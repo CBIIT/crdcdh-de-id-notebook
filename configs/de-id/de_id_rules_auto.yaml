@@ -1,0 +1,329 @@
+rules:
+  dicom_tags:
+  - name: Patient's Name
+    tag:
+    - 0x10
+    - 0x10
+  - name: Patient ID
+    tag:
+    - 0x10
+    - 0x20
+  - name: Patient's Birth Date
+    tag:
+    - 0x10
+    - 0x30
+  - name: Patient's Sex
+    tag:
+    - 0x10
+    - 0x30
+  - name: Patient's Age
+    tag:
+    - 0x10
+    - 0x1010
+  - name: Patient's Size
+    tag:
+    - 0x10
+    - 0x1020
+  - name: Patient's Weight
+    tag:
+    - 0x10
+    - 0x1030
+  - name: Patient's Address
+    tag:
+    - 0x10
+    - 0x1040
+  - name: Patient's Telephone Numbers
+    tag:
+    - 0x10
+    - 0x1050
+  - name: Patient's Insurance Plan
+    tag:
+    - 0x10
+    - 0x1060
+  - name: Patient's Relationship Status
+    tag:
+    - 0x10
+    - 0x1070
+  - name: Other Patient IDs
+    tag:
+    - 0x10
+    - 0x1000
+  - name: Other Patient Names
+    tag:
+    - 0x10
+    - 0x1001
+  - name: Medical Record Locator
+    tag:
+    - 0x10
+    - 0x1090
+  - name: Study Instance UID
+    tag:
+    - 0x20
+    - 0xD
+  - name: Study ID
+    tag:
+    - 0x20
+    - 0x10
+  - name: Study Date
+    tag:
+    - 0x8
+    - 0x20
+  - name: Study Time
+    tag:
+    - 0x8
+    - 0x30
+  - name: Referring Physician's Name
+    tag:
+    - 0x8
+    - 0x90
+  - name: Accession Number
+    tag:
+    - 0x8
+    - 0x50
+  - name: Study Description
+    tag:
+    - 0x8
+    - 0x1030
+  - name: Physician(s) of Record
+    tag:
+    - 0x8
+    - 0x1048
+  - name: Name of Physician(s) Reading Study
+    tag:
+    - 0x8
+    - 0x1060
+  - name: Series Instance UID
+    tag:
+    - 0x20
+    - 0xE
+  - name: Series Number
+    tag:
+    - 0x20
+    - 0x11
+  - name: Series Date
+    tag:
+    - 0x8
+    - 0x21
+  - name: Series Time
+    tag:
+    - 0x8
+    - 0x31
+  - name: Series Description
+    tag:
+    - 0x8
+    - 0x103E
+  - name: Manufacturer
+    tag:
+    - 0x8
+    - 0x70
+  - name: Institution Name
+    tag:
+    - 0x8
+    - 0x80
+  - name: Station Name
+    tag:
+    - 0x8
+    - 0x1010
+  - name: Institutional Department Name
+    tag:
+    - 0x8
+    - 0x1040
+  - name: Manufacturer's Model Name
+    tag:
+    - 0x8
+    - 0x1090
+  - name: Device Serial Number
+    tag:
+    - 0x18
+    - 0x1000
+  - name: Secondary Capture Device Manufacturer
+    tag:
+    - 0x18
+    - 0x1016
+  - name: Device Serial Number
+    tag:
+    - 0x18
+    - 0x1000
+  - name: Secondary Capture Device Manufacturer
+    tag:
+    - 0x18
+    - 0x1016
+  - name: Secondary Capture Device Manufacturer's Model Name
+    tag:
+    - 0x18
+    - 0x1018
+  - name: SOP Instance UID
+    tag:
+    - 0x8
+    - 0x18
+  - name: Frame of Reference UID
+    tag:
+    - 0x20
+    - 0x52
+  - name: Synchronization Frame of Reference UID
+    tag:
+    - 0x20
+    - 0x200
+  - name: Institution Address
+    tag:
+    - 0x8
+    - 0x81
+  - name: Admission ID
+    tag:
+    - 0x38
+    - 0x10
+  - name: Discharge Diagnosis Description
+    tag:
+    - 0x38
+    - 0x61
+  - name: Current Patient Location
+    tag:
+    - 0x38
+    - 0x300
+  - name: Scheduled Station AE Title
+    tag:
+    - 0x40
+    - 0x1
+  - name: Scheduled Procedure Step Start Date
+    tag:
+    - 0x40
+    - 0x2
+  - name: Scheduled Procedure Step Start Time
+    tag:
+    - 0x40
+    - 0x3
+  - name: Scheduled Performing Physician's Name
+    tag:
+    - 0x40
+    - 0x6
+  - name: Scheduled Station Name
+    tag:
+    - 0x40
+    - 0x10
+  - name: Requested Procedure ID
+    tag:
+    - 0x40
+    - 0x1001
+  - name: Reason for the Requested Procedure
+    tag:
+    - 0x40
+    - 0x1002
+  - name: Reason for the Imaging Service Request
+    tag:
+    - 0x40
+    - 0x2001
+  - name: Admitting Diagnoses Description
+    tag:
+    - 0x8
+    - 0x1084
+  - name: Referenced Patient Sequence
+    tag:
+    - 0x8
+    - 0x1120
+  - name: Additional Patient History
+    tag:
+    - 0x10
+    - 0x21B0
+  - name: Discharge Diagnosis Description
+    tag:
+    - 0x38
+    - 0x40
+  - name: Performed Station AE Title
+    tag:
+    - 0x40
+    - 0x241
+  - name: Performed Station Name
+    tag:
+    - 0x40
+    - 0x242
+  - name: Performed Location
+    tag:
+    - 0x40
+    - 0x243
+  - name: Performed Procedure Step Start Date
+    tag:
+    - 0x40
+    - 0x244
+  - name: Performed Procedure Step Start Time
+    tag:
+    - 0x40
+    - 0x245
+  - name: Performed Procedure Step ID
+    tag:
+    - 0x40
+    - 0x253
+  - name: Acquisition DateTime
+    tag:
+    - 0x8
+    - 0x2A
+  - name: Acquisition Date
+    tag:
+    - 0x8
+    - 0x22
+  - name: Acquisition Time
+    tag:
+    - 0x8
+    - 0x23
+  - name: Overlay Date
+    tag:
+    - 0x8
+    - 0x24
+  - name: Curve Date
+    tag:
+    - 0x8
+    - 0x25
+  - name: Overlay Time
+    tag:
+    - 0x8
+    - 0x26
+  - name: Curve Time
+    tag:
+    - 0x8
+    - 0x27
+  - name: Private tag data
+    tag:
+    - 0x13
+    - 0x1013
+  - name: Content Date
+    tag:
+    - 0x8
+    - 0x23
+  - name: Content Time
+    tag:
+    - 0x8
+    - 0x33
+  - Name: Private tag data
+    tag:
+    - 0x13
+    - 0x1013
+  - name: Additional Patient History
+    tag:
+    - 0x8
+    - 0x23
+  - name: Referring Physician's Telephone Numbers
+    tag:
+    - 0x8
+    - 0x94
+  - name: SOP Class UID
+    tag:
+    - 0x8
+    - 0x16
+  - name: Referenced SOP Instance UID
+    tag:
+    - 0x8
+    - 0x1155
+  - name: UID
+    tag:
+    - 0x40
+    - 0xA124
+  - name: Storage Media File-set UID
+    tag:
+    - 0x88
+    - 0x140
+  keywords:
+  - Date
+  - Address
+  - Telephone Numbers
+  - Fax Numbers
+  - Address
+  - Time

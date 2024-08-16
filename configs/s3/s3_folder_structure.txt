@@ -1,0 +1,21 @@
+CRDC Datahub Machine Learning S3 bucket and Folder Structure
+
+S3 Bucket:  crdcdh-ml-[tier]  * tier value in [loc, dev, qa, stage, prod], e.g. crdcdh-ml-dev
+
+Prefix: 1) raw data:    data/raw/json/[timestamp]  * current raw data for training is in json format and quite static, timestamp in the format of yyyy-MM-dd-hh-mm-ss
+
+        2) training data:  
+                        data/train/[container name]-[timestamp]/      * transformed training in text8 format for blazingtext, they could be quite dynamic in non-prod env.
+                        timestamp in the format of yyyy-MM-dd-hh-mm-ss-milisec, e.g. data/train/blazingtext-2024-06-05-20-52-55-223
+
+        3) test data:   data/test/[timestamp]/ * test data for evaluate trained model, they are quite static. 
+                        timestamp in the format of yyyy-MM-dd-hh-mm-ss-milisec, e.g. data/test/2024-06-05-20-52-55 
+
+        4) training_output:
+                        train_output/[container name]-[timestamp]/   * timestamp in the format of yyyy-MM-dd-hh-mm-ss-milisec, 
+                        e.g. train_output/blazingtext-2024-06-05-20-52-55-223/   
+        
+        5) trained_model_output: 
+                        train_output/[container name]-[timestamp]/output
+
+Trained model key:      train_output/[container name]-[timestamp]/output/model.tar.gz
