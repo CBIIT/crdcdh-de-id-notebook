@@ -336,7 +336,9 @@ rules:
   - \d{2}/\d{2}/\d{2} # Date (MM/DD/YY)
   - \d{2}.\d{2}.\d{2}  # Date (MM.DD.YY)
   - \d{2}-\d{2}-\d{2}  # Date (DD-MM-YY)
-  - \d{3}-\d{7}  # Phone Number
+  - \d{4}-\d{2}-\d{2} # Date (YYYY-MM-DD)
+  - \d{3}[-.\s]?\d{3}[-.\s]?\d{4} # Phone Number (XXX-XXX-XXXX, XXX.XXX.XXXX)
+  - \(\d{3}\)\d{3}-\d{4}  # Phone Number ((XXX)XXX-XXXX)
   - \d{5}(?:[-\s]\d{4})?  # Zip Code
   - \d{3}-\d{2}-\d{4}  # Driver's License
   - \d{9}\b' # Social Security Number

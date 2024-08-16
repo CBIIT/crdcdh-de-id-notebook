@@ -5,9 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 from botocore.exceptions import ClientError
-from common.utils import process_dict_tags, get_date_time, dict2yaml, get_boto3_session, yaml2dict
+from common.utils import process_dict_tags, get_date_time, dict2yaml, get_boto3_session, yaml2dict, generate_regex
 from common.sagemaker_utils import get_sagemaker_execute_role, create_local_output_dirs
 from common.de_id_utils import generate_clean_image, get_pii_boxes
+import re
+import re
+import re
 
 class ProcessMedImage:
     def __init__(self, rule_config_file_path= '../configs/de-id/de_id_rules_auto.yaml'):
@@ -186,6 +189,10 @@ class ProcessMedImage:
             print(f"PHI detected in text:")
             for entity in phi_entities:
                 print(f"Entity: {entity['Text']} - Type: {entity['Type']} - Confidence: {entity['Score']}")
+                if is_image and entity['Type'] in ["ID", "AGE", "ADDRESS", "PHONE_OR_FAX", "DATE"]:
+                    regex = generate_regex(entity['Text'])
+                    if regex:
+                        self.regex.append(regex)
             ids.append(text)
         return ids
     
@@ -333,11 +340,10 @@ class ProcessMedImage:
         image = Image.fromarray(self.image_data)
 
         return generate_clean_image(image, [ item["Text Block"]  for item in all_ids], output_image_path)
-
     
-    def update_rules_in_configs(self, tags, keywords, config_file = None):
+    def update_rules_in_configs(self, config_file = None):
         """
-        Convert dictionary to YAML and save to file.
+        Update rules and export to YAML file.
         """
         # Process the dictionary
         tags_key = "dicom_tags"
@@ -345,8 +351,9 @@ class ProcessMedImage:
             config_file = self.rule_config_file_path
         dictionary = {}
         dictionary["rules"] = self.rules
-        dictionary["rules"][tags_key] = tags
-        dictionary["rules"]["keywords"] = keywords
+        dictionary["rules"][tags_key] = self.tags
+        dictionary["rules"]["keywords"] = self.keywords
+        dictionary["rules"]["regex"] = self.regex
         dictionary["rules"][tags_key] = process_dict_tags( dictionary["rules"][tags_key], "tag")
         print(dictionary)
 

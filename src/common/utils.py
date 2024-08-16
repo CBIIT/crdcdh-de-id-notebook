@@ -138,3 +138,58 @@ def dump_dict_to_tsv(dict_list, file_path):
         dict_writer.writerows(dict_list) 
     return True
 
+def generate_regex(data):
+    """
+    Generate a regular expression pattern from the given data.
+    """
+    pattern = ''
+    dataLength = len(data)
+    i = 0
+    
+    while i < dataLength:
+        char = data[i]
+        if isinstance(data, str) and char.isalpha():
+            start = i
+            while i < dataLength and data[i].isalpha():
+                i += 1
+            if i - start > 1:
+                pattern += '[a-zA-Z]{' + str(i - start) + '}'
+            else:
+                pattern += '[a-zA-Z]'
+        elif isinstance(data, str) and char.isdigit():
+            start = i
+            while i < dataLength and data[i].isdigit():
+                i += 1
+            if i - start > 1:
+                pattern += r'\d{' + str(i - start) + '}'
+            else:
+                pattern += r'\d'
+        elif isinstance(data, str) and char.isspace():
+            start = i
+            while i < dataLength and data[i].isspace():
+                i += 1
+            if i - start > 1:
+                pattern += r'\s{' + str(i - start) + '}'
+            else:
+                pattern += r'\s'
+        elif isinstance(data, bytes):
+            count = 1
+            while i + count < dataLength and data[i] == data[i + count]:
+                count += 1
+            if count == 1:
+                pattern += b'\\x' + format(data[i], '02x').encode('utf-8')
+            else:
+                pattern += b'\\x' + format(data[i], '02x').encode('utf-8') + b'{' + str(count).encode('utf-8') + b'}'
+            i += count
+        else:
+            pattern += escapeSpecialChar(char)
+            i += 1
+    return pattern
+
+def escapeSpecialChar(char):
+    """
+    Escape special characters in a string.
+    """
+    special = ".^$*+?()[]{}|\\"
+    return f"\\{char}" if not char in special else char
+
