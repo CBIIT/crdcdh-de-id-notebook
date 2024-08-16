@@ -1,0 +1,9 @@
+SchemaVersion: '1.0'
+SageMaker:
+  PythonSDK:
+    Modules:
+      RemoteFunction:
+        Dependencies: 'path/to/requirements.txt'
+        ImageUri: '811284229777.dkr.ecr.us-east-1.amazonaws.com/blazingtext:latest'
+        InstanceType: 'ml.t3.medium'
+        RoleArn: 'arn:aws:iam:::role/service-role/AmazonSageMaker-ExecutionRole'

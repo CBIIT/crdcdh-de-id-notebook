@@ -1,0 +1,76 @@
+from PIL import ImageDraw
+import re
+from nameparser import HumanName
+
+pii_patterns = re.compile(
+        r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b' #email
+        r'\b\d{3}-\d{2}-\d{4}\b' # SSN
+        r'\b\d{2}/\d{2}/\d{4}\b'  # Date (MM/DD/YYYY)
+        r'\b\d{2}.\d{2}.\d{4}\b'  # Date (MM.DD.YYYY)
+        r'\b\d{2}-\d{2}-\d{4}\b'  # Date (DD-MM-YYYY)
+        r'\b\d{2}/\d{2}/\d{2}\b'  # Date (MM/DD/YY)
+        r'\b\d{2}.\d{2}.\d{2}\b'  # Date (MM.DD.YY)
+        r'\b\d{2}-\d{2}-\d{2}\b'  # Date (DD-MM-YY)
+        r'\b\d{3}-\d{7}\b'  # Phone Number
+        r'\b\d{5}(?:[-\s]\d{4})?\b'  # Zip Code
+        r'\b\d{3}-\d{2}-\d{4}\b'  # Driver's License
+        r'\b\d{9}\b' # Social Security Number
+        r'\b\d{3}-\d{2}-\d{4}\b'  # Insurance Policy Number
+        r'\b\d{5}(?:[-\s]\d{4})?\b'  # Postal Code
+        r'\b\d{3}-\d{2}-\d{4}\b'  # Medical Record Number
+        r'\b\d{3}-\d{2}-\d{4}\b'  # Health Insurance Card Number
+    )
+
+def contains_name(text):
+    # Parse the text as a potential human name
+    name = HumanName(text)
+    
+    # Check if the parsed result contains a valid name
+    if name.first or name.last:
+        return True
+    return False
+
+def generate_clean_image(image, boxes, output_image_path):
+    draw = ImageDraw.Draw(image)
+    for box in boxes:
+        x, y, w, h = int(box['Left']), int(box['Top']), int(box['Width']), int(box['Height'])
+        draw.rectangle([x, y, x + w, y + h], fill="red")
+    image.save(output_image_path)
+    return True
+
+def load_image(image_path):
+    with open(image_path, 'rb') as image_file:
+        return image_file.read()
+    
+def get_text_boxes(detected_txt):
+    text_detections = detected_txt['TextDetections']
+    boxes = []
+    for text in text_detections:
+        if text['Type'] == 'LINE':
+            box = text['Geometry']['BoundingBox']
+            boxes.append(box)
+    return boxes
+
+def get_pii_patterns(): 
+    return pii_patterns 
+
+def is_pii(text):
+    # 1) check if the text contain human names
+    result = contains_name(text)
+    # Find all matches
+    matches = pii_patterns.findall(text)
+    # for match in matches:
+    #     print(f"Detected PHI: {match}")
+    if result or len(matches) > 0:
+        return True
+    return False
+
+def get_pii_boxes(text_blocks):
+    pii_boxes = []
+    for box, text in text_blocks:
+        print("Found text: " + text)
+        result = is_pii(text)
+        if result:
+            pii_boxes.append({"Text": text, "Text Block": box})
+    return pii_boxes
+

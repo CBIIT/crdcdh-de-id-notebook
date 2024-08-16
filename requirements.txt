@@ -1,0 +1,14 @@
+numpy
+pandas
+matplotlib
+boto3
+jupyter
+sagemaker 
+ipywidgets 
+datasets 
+seqeval
+pydicom
+pillow
+xtarfile
+pytesseract
+nameparser
