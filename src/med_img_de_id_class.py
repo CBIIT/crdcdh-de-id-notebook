@@ -1,5 +1,6 @@
 import pydicom
 import pytesseract
+import re
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -31,6 +32,7 @@ class ProcessMedImage:
         self.dicom_tags = None
         self.phi_tags = None
         self.sensitive_words = None
+        self.regex = None
         self.set_rules(rule_config_file_path)
         self.image_data = None
 
@@ -40,12 +42,13 @@ class ProcessMedImage:
         """
         # Load the rules from the YAML file
         self.rules = yaml2dict(rule_config_file_path)["rules"]
-        self.rules = yaml2dict(rule_config_file_path)["rules"]
         self.dicom_tags = self.rules['dicom_tags']
         self.phi_tags = [ tuple(item["tag"]) for item in self.rules['dicom_tags']]
         # print(self.phi_tags)
         self.sensitive_words = self.rules['keywords']
         # print(self.sensitive_words)
+        self.regex = self.rules['regex']
+        self.pii_patterns = re.compile(r'\b(?:{0})\b'.format('|'.join(self.regex)))
 
 
     def upload_dicom_file(self, src_bucket, src_key, local_dicom_path, useAI = False):
@@ -264,7 +267,7 @@ class ProcessMedImage:
                 text_boxes.append((box, line_text))
 
             # use regular expression and name parser to detect PHI in text
-            all_ids = get_pii_boxes(text_boxes)
+            all_ids = get_pii_boxes(text_boxes, self.pii_patterns)
 
         return all_ids
 
