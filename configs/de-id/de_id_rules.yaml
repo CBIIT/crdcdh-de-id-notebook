@@ -178,3 +178,4 @@ rules:
   - \d{5}(?:[-\s]\d{4})?  # Postal Code
   - \d{3}-\d{2}-\d{4}  # Medical Record Number
   - \d{3}-\d{2}-\d{4}  # Health Insurance Card Number
+  confidence_threshold: 0
