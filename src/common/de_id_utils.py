@@ -1,15 +1,16 @@
 from PIL import ImageDraw
 import re
 from nameparser import HumanName
+from common.constants import HUMAN_NAME_REGEX
 
 def contains_name(text):
     # Parse the text as a potential human name
     name = HumanName(text)
-    
     # Check if the parsed result contains a valid name
-    if name.first or name.last:
-        return True
-    return False
+    if name.first and name.last:
+        matches = re.findall(HUMAN_NAME_REGEX, name.first + " " + name.last)
+        return len(matches) > 0 
+    else: return False
 
 def generate_clean_image(image, boxes, output_image_path):
     draw = ImageDraw.Draw(image)
@@ -46,7 +47,9 @@ def is_pii(text, pii_patterns):
 def get_pii_boxes(text_blocks, pii_patterns):
     pii_boxes = []
     for box, text in text_blocks:
-        print("Found text: " + text)
+        if not text or text.strip() == "":
+            continue
+        # print("Found text: " + text)
         result = is_pii(text, pii_patterns)
         if result:
             pii_boxes.append({"Text": text, "Text Block": box})

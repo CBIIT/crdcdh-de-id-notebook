@@ -1,5 +1,8 @@
 import tarfile, json, re, requests, yaml, boto3, sys, csv
 from datetime import datetime 
+import os
+import shutil
+import matplotlib.pyplot as plt
 
 def untar_file(tar_file, dest_dir):
     """
@@ -138,6 +141,11 @@ def dump_dict_to_tsv(dict_list, file_path):
         dict_writer.writerows(dict_list) 
     return True
 
+def dump_object_to_text(obj, file_path):
+    object_str = repr(obj)
+    with open(file_path, 'w') as output_file:
+        output_file.write(str(object_str))
+
 def generate_regex(data):
     """
     Generate a regular expression pattern from the given data.
@@ -192,4 +200,30 @@ def escapeSpecialChar(char):
     """
     special = ".^$*+?()[]{}|\\"
     return f"\\{char}" if not char in special else char
+
+def cleanup_dir(dirs):
+    """
+    Clean up directories
+    """
+    for dir in dirs:
+        if os.path.exists(dir) and os.path.isdir(dir):
+            if os.path.exists(dir):
+                shutil.rmtree(dir)
+        os.makedirs(dir)
+
+def convert_basetag(base_tag):
+    if base_tag and base_tag > 0:
+        return ((base_tag >> 16) & 0xFFFF, base_tag & 0xFFFF)
+    
+def draw_img(img):
+    """
+    draw pillow image
+    """
+    #Set the image color map to grayscale, turn off axis graphing, and display the image
+    plt.rcParams["figure.figsize"] = [16,9]
+    # Display the image
+    plt.imshow(img, cmap=plt.cm.gray)
+    plt.title('DICOM Image')
+    plt.axis('off')  # Turn off the axis
+    plt.show()
 
