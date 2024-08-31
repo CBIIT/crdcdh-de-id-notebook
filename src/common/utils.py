@@ -216,6 +216,9 @@ def convert_basetag(base_tag):
         return ((base_tag >> 16) & 0xFFFF, base_tag & 0xFFFF)
     
 def draw_img(img):
+    if img is None: 
+        print("Image is empty!")
+        return
     """
     draw pillow image
     """
@@ -226,4 +229,35 @@ def draw_img(img):
     plt.title('DICOM Image')
     plt.axis('off')  # Turn off the axis
     plt.show()
+
+def load_json_file(file_path):
+    """
+    load json file
+    """
+    try:
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+    
+def save_dict_to_json(dict, output_file_path):
+    """
+    Save dicom uid map to json file.
+    """
+    with open(output_file_path, 'w') as fp:
+        json.dump(dict, fp)
+
+def convert_json_to_csv(json_file, csv_file, cols = ["id_old", "id_new"]):
+    """
+    Convert json file to csv file
+    """
+    with open(json_file, 'r') as json_file:
+        data = json.load(json_file)
+
+    with open(csv_file, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(cols)
+        for key, value in data.items():
+            writer.writerow([key, value])
+
 

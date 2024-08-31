@@ -1,4 +1,11 @@
 # constants
 MODELS_DEFINITION_FILE = "content.json"
 LIST_DELIMITER_PROP = "list-delimiter"
-HUMAN_NAME_REGEX = r"\b(?!.*[\d:;,])[A-Z][a-z]+(?:[ '-][A-Z][a-z]+|\.[A-Z])*[a-z]*\b"
+HUMAN_NAME_REGEX = r"\b(?!.*[\d:;,])[A-Z][A-Za-z]+(?:[ '-][A-Z][A-Za-z]+|\.[A-Z])*[A-Za-z]*\b"
+REPEAT_CHAR_REGEX = r"([a-zA-Z])\1\1"
+DICOM_UID_MAP_JSON = "../mapping/uid_mapping.json"
+PATIENT_ID_MAP_JSON = "../mapping/patient_id_mapping.json"
+PATIENT_SEQUENCES_JSON = "../mapping/patient_sequences.json"
+EMPTY_STRING = ""
+KEYWORDS_IN_PIXEL_JSON = "../configs/de-id/keywords_in_pixel.json"
+ANONYMIZED = "^ANONYMIZED"
