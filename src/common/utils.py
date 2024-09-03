@@ -3,6 +3,9 @@ from datetime import datetime
 import os
 import shutil
 import matplotlib.pyplot as plt
+import os
+import shutil
+import matplotlib.pyplot as plt
 
 def untar_file(tar_file, dest_dir):
     """
@@ -140,6 +143,11 @@ def dump_dict_to_tsv(dict_list, file_path):
         dict_writer.writeheader()
         dict_writer.writerows(dict_list) 
     return True
+
+def dump_object_to_text(obj, file_path):
+    object_str = repr(obj)
+    with open(file_path, 'w') as output_file:
+        output_file.write(str(object_str))
 
 def dump_object_to_text(obj, file_path):
     object_str = repr(obj)

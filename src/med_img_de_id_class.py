@@ -5,7 +5,6 @@ import numpy as np
 from PIL import Image, ImageDraw
 from botocore.exceptions import ClientError
 from common.utils import process_dict_tags, get_date_time, dict2yaml, load_json_file, yaml2dict, generate_regex, save_dict_to_json, convert_json_to_csv
-# from common.sagemaker_utils import create_local_output_dirs
 from common.de_id_utils import get_pii_boxes
 from common.pixel_utils import parse_pixel_data, enhance_image
 from common.constants import DICOM_UID_MAP_JSON, EMPTY_STRING, PATIENT_ID_MAP_JSON, PATIENT_SEQUENCES_JSON, ANONYMIZED
@@ -16,19 +15,26 @@ class ProcessMedImage:
         """
         self.quiet = silence_mode
         self.boto3_session = boto3_session #get_boto3_session()
+        self.quiet = silence_mode
+        self.boto3_session = boto3_session #get_boto3_session()
         self.timestamp = get_date_time()
         self.data_time = get_date_time("%Y-%m-%d-%H-%M-%S")
         # self.role = get_sagemaker_execute_role(self.boto3_session)
         self.s3_client = self.boto3_session.client('s3') if self.boto3_session else None
+        # self.role = get_sagemaker_execute_role(self.boto3_session)
+        self.s3_client = self.boto3_session.client('s3') if self.boto3_session else None
         self.rekognition= None
         self.comprehend_medical = None
+        # set rules
         # set rules
         self.rule_config_file_path = rule_config_file_path
         self.rules = None
         self.dicom_tags = None
         self.phi_tags = None
         self.sensitive_words = None
+        self.vr = None
         self.regex = None
+        self.confidence_threshold = None
         self.confidence_threshold = None
         self.set_rules(rule_config_file_path)
         # dicom data
@@ -118,6 +124,8 @@ class ProcessMedImage:
         """
         if not self.quiet:
             print("De-identifying DICOM metadata")
+        if not self.quiet:
+            print("De-identifying DICOM metadata")
         # Redact PHI in the DICOM dataset
         redacted = 0
         redacted_value = "None"
@@ -153,6 +161,7 @@ class ProcessMedImage:
         """
         tags = []
         detected_elements = []
+        detected_elements = []
         all_ids = []
         ids_list = []
         ids = []
@@ -173,6 +182,8 @@ class ProcessMedImage:
                 if ids and len(ids) > 0:
                     if not self.quiet:
                         print(f"Tag: {item}")
+                    if not self.quiet:
+                        print(f"Tag: {item}")
                     all_ids.extend(ids)
                     detected_elements.append(item)
                     
@@ -188,10 +199,13 @@ class ProcessMedImage:
                             ids_list.extend(ids)
                             if ids and len(ids) > 0 and not self.quiet:
                                 print(f"Tag: {item}")
+                            if ids and len(ids) > 0 and not self.quiet:
+                                print(f"Tag: {item}")
                     else:
                         ids = self.detect_id_in_text_AI(item, is_image=False)
                         ids_list.extend(ids)
                         if ids and len(ids) > 0:
+                            print(f"Tag: {item}")
                             print(f"Tag: {item}")
                 if len(ids_list) > 0:
                     if not self.quiet:
@@ -216,10 +230,14 @@ class ProcessMedImage:
         """
         detect PHI info in text by Comprehend Medical
         """
+        """
+        detect PHI info in text by Comprehend Medical
+        """
         ids = []
         if not detected_text: return ids
         text = detected_text['DetectedText'] if is_image else detected_text
         phi_entities = self.analyze_text_for_phi(text)
+        valid_entities = []
         valid_entities = []
         if phi_entities and len(phi_entities) > 0:
             for entity in phi_entities:
@@ -257,6 +275,9 @@ class ProcessMedImage:
                 }
             })
             detected_texts = [text for text in response['TextDetections']]
+            extracted_text = (len(detected_texts) > 0)
+            if not extracted_text: return all_ids, extracted_text
+            img_width, img_height = self.ds.Columns, self.ds.Rows  # Number of rows corresponds to the height
             extracted_text = (len(detected_texts) > 0)
             if not extracted_text: return all_ids, extracted_text
             img_width, img_height = self.ds.Columns, self.ds.Rows  # Number of rows corresponds to the height
@@ -434,7 +455,7 @@ class ProcessMedImage:
                 return "000000.00"
         else:
             return None
-
+        
     def redact_id_in_image(self, all_ids):
         """
         redact id in image
