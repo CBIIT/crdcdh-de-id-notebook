@@ -1,5 +1,5 @@
 rules:
- dicom_tags: 
+  dicom_tags: 
     - tag:  [0x0010,0x0010]
       name: Patient's Name
     - tag:  [0x0010,0x0020]
@@ -152,30 +152,27 @@ rules:
       name: Additional Patient History
     - tag:  [0x0008,0x0094]
       name: Referring Physician's Telephone Numbers
-
- keywords:
-    - 'Date'
+  # detect PHI info in DICOM metadata by element name
+  keywords:
     - 'Address'
     - 'Telephone Numbers'
     - 'Fax Numbers'
     - 'Address'
-    - 'UID'
-    - 'Time'
-  regex:
-  - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}' #email
-  - \d{3}-\d{2}-\d{4} # SSN
-  - d{2}/\d{2}/\d{4}  # Date (MM/DD/YYYY)
-  - \d{2}.\d{2}.\d{4}  # Date (MM.DD.YYYY)
-  - \d{2}-\d{2}-\d{4} # Date (DD-MM-YYYY)
-  - \d{2}/\d{2}/\d{2} # Date (MM/DD/YY)
-  - \d{2}.\d{2}.\d{2}  # Date (MM.DD.YY)
-  - \d{2}-\d{2}-\d{2}  # Date (DD-MM-YY)
-  - \d{3}-\d{7}  # Phone Number
-  - \d{5}(?:[-\s]\d{4})?  # Zip Code
-  - \d{3}-\d{2}-\d{4}  # Driver's License
-  - \d{9}\b' # Social Security Number
-  - \d{3}-\d{2}-\d{4}  # Insurance Policy Number
-  - \d{5}(?:[-\s]\d{4})?  # Postal Code
-  - \d{3}-\d{2}-\d{4}  # Medical Record Number
-  - \d{3}-\d{2}-\d{4}  # Health Insurance Card Number
-  confidence_threshold: 0
+  # patterns to detect PHI info in DICOM pixel data
+  regex: 
+    # - (?!.*[\d:;,])[A-Z][a-z]+(?:[ '-][A-Z][a-z]+|\.[A-Z])*[a-z]* #human name
+    - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}' #email
+    - \d{3}-\d{2}-\d{4} # SSN
+    - d{2}/\d{2}/\d{4}  # Date (MM/DD/YYYY)
+    - \d{2}.\d{2}.\d{4}  # Date (MM.DD.YYYY)
+    - \d{2}-\d{2}-\d{4} # Date (DD-MM-YYYY)
+    - \d{2}/\d{2}/\d{2} # Date (MM/DD/YY)
+    - \d{2}.\d{2}.\d{2}  # Date (MM.DD.YY)
+    - \d{2}-\d{2}-\d{2}  # Date (DD-MM-YY)
+    - \d{3}[-.\s]?d{7}  # Phone Number
+    - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}  # Phone Number
+    - \(\d{3}\)[\s]?\d{3}-\d{4}  # Phone Number
+    - \d{5}(?:[-\s]\d{4})?  # Zip Code
+    - \d{3}-\d{2}-\d{4}  # Driver's License, Insurance Policy Number, Medical Record Number, Health Insurance Card Number
+  # confidence threshold for detecting PHI info in DICOM metadata and for extract text from pixel data
+  confidence_threshold: 80

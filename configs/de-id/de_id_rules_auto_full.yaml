@@ -1,5 +1,5 @@
 rules:
-  confidence_threshold: 80
+  confidence_threshold: 5
   dicom_tags:
   - name: Patient's Name
     tag:
@@ -12,7 +12,7 @@ rules:
   - name: Patient's Sex
     tag:
     - 0x10
-    - 0x30
+    - 0x40
   - name: Patient's Age
     tag:
     - 0x10
@@ -65,26 +65,6 @@ rules:
     tag:
     - 0x8
     - 0x1155
-  - name: Institution Name
-    tag:
-    - 0x8
-    - 0x80
-  - name: Private tag data
-    tag:
-    - 0x13
-    - 0x1013
-  - name: UID
-    tag:
-    - 0x40
-    - 0xA124
-  - name: Storage Media File-set UID
-    tag:
-    - 0x88
-    - 0x140
-  - name: Instance Creator UID
-    tag:
-    - 0x8
-    - 0x14
   - name: Study Date
     tag:
     - 0x8
@@ -101,22 +81,14 @@ rules:
     tag:
     - 0x8
     - 0x23
-  - name: Series Time
-    tag:
-    - 0x8
-    - 0x31
-  - name: Acquisition Time
-    tag:
-    - 0x8
-    - 0x32
-  - name: Content Time
-    tag:
-    - 0x8
-    - 0x33
   - name: Accession Number
     tag:
     - 0x8
     - 0x50
+  - name: Private tag data
+    tag:
+    - 0x13
+    - 0x1013
   - name: Secondary Capture Device ID
     tag:
     - 0x18
@@ -125,14 +97,251 @@ rules:
     tag:
     - 0x18
     - 0x1012
-  - name: Time of Secondary Capture
-    tag:
-    - 0x18
-    - 0x1014
   - name: Secondary Capture Device Software Versions
     tag:
     - 0x18
     - 0x1019
+  - name: Study Description
+    tag:
+    - 0x8
+    - 0x1030
+  - name: Scheduled Procedure Step Start Date
+    tag:
+    - 0x40
+    - 0x2
+  - name: Scheduled Procedure Step End Date
+    tag:
+    - 0x40
+    - 0x4
+  - name: Performed Procedure Step Start Date
+    tag:
+    - 0x40
+    - 0x244
+  - name: '[The Acquisition Date of NRA]'
+    tag:
+    - 0x7005
+    - 0x1024
+  - name: Institution Name
+    tag:
+    - 0x8
+    - 0x80
+  - name: Date of Last Detector Calibration
+    tag:
+    - 0x18
+    - 0x700C
+  - name: Performed Procedure Step End Date
+    tag:
+    - 0x40
+    - 0x250
+  - name: Patient's Birth Date
+    tag:
+    - 0x10
+    - 0x30
+  - name: Instance Creation Date
+    tag:
+    - 0x8
+    - 0x12
+  - name: Instance Creator UID
+    tag:
+    - 0x8
+    - 0x14
+  - name: '[PET patient_datetime]'
+    tag:
+    - 0x9
+    - 0x1005
+  - name: '[PET scan_datetime]'
+    tag:
+    - 0x9
+    - 0x100D
+  - name: '[PET scan_ready]'
+    tag:
+    - 0x9
+    - 0x100E
+  - name: '[PET meas_datetime]'
+    tag:
+    - 0x9
+    - 0x1039
+  - name: '[PET admin_datetime]'
+    tag:
+    - 0x9
+    - 0x103B
+  - name: '[PET post_inj_datetime]'
+    tag:
+    - 0x9
+    - 0x103D
+  - name: '[PET landmark_datetime]'
+    tag:
+    - 0x9
+    - 0x1068
+  - name: '[PET acq_start]'
+    tag:
+    - 0x9
+    - 0x106C
+  - name: '[PET is_datetime]'
+    tag:
+    - 0x9
+    - 0x107B
+  - name: Acquisition DateTime
+    tag:
+    - 0x8
+    - 0x2A
+  - name: Last Menstrual Date
+    tag:
+    - 0x10
+    - 0x21D0
+  - name: Software Versions
+    tag:
+    - 0x18
+    - 0x1020
+  - name: Date of Last Calibration
+    tag:
+    - 0x18
+    - 0x1200
+  - name: '[PET exam_id]'
+    tag:
+    - 0x9
+    - 0x1007
+  - name: '[PET for_identifier]'
+    tag:
+    - 0x9
+    - 0x1013
+  - name: '[PET normal_cal_id]'
+    tag:
+    - 0x9
+    - 0x1056
+  - name: '[PET normal_2d_cal_id]'
+    tag:
+    - 0x9
+    - 0x1057
+  - name: '[PET frame_id]'
+    tag:
+    - 0x9
+    - 0x105C
+  - name: '[PET exam_id]'
+    tag:
+    - 0x9
+    - 0x105E
+  - name: '[PET norm_cal_id]'
+    tag:
+    - 0x9
+    - 0x1098
+  - name: Storage Media File-set UID
+    tag:
+    - 0x88
+    - 0x140
+  - name: Manufacturer's Model Name
+    tag:
+    - 0x8
+    - 0x1090
+  - name: Pixel Intensity Relationship
+    tag:
+    - 0x28
+    - 0x1040
+  - name: Rescale Type
+    tag:
+    - 0x28
+    - 0x1054
+  - name: '[PET scan_id]'
+    tag:
+    - 0x9
+    - 0x100A
+  - name: '[PET wc_cal_id]'
+    tag:
+    - 0x9
+    - 0x1059
+  - name: '[PET scan_id]'
+    tag:
+    - 0x9
+    - 0x105D
+  - name: '[PET trans_scan_id]'
+    tag:
+    - 0x9
+    - 0x1097
+  - name: '[PET trans_frame_id]'
+    tag:
+    - 0x9
+    - 0x10AD
+  - name: Device Serial Number
+    tag:
+    - 0x18
+    - 0x1000
+  - name:
+    - SlicePosition_PCS
+    tag:
+    - 0x19
+    - 0x1015
+  - name: UID
+    tag:
+    - 0x40
+    - 0xA124
+  - name: Image Comments
+    tag:
+    - 0x20
+    - 0x4000
+  - name: Code Value
+    tag:
+    - 0x8
+    - 0x100
+  - name: Code Value
+    tag:
+    - 0x8
+    - 0x100
+  - name: Plate ID
+    tag:
+    - 0x18
+    - 0x1004
+  - name: Detector ID
+    tag:
+    - 0x18
+    - 0x700A
+  - name: Scheduled Procedure Step ID
+    tag:
+    - 0x40
+    - 0x9
+  - name: Requested Procedure ID
+    tag:
+    - 0x40
+    - 0x1001
+  - name: Coding Scheme Designator
+    tag:
+    - 0x8
+    - 0x102
+  - name: Retrieve AE Title
+    tag:
+    - 0x8
+    - 0x54
+  - name: Series Description
+    tag:
+    - 0x8
+    - 0x103E
+  - name: Protocol Name
+    tag:
+    - 0x18
+    - 0x1030
+  - name: Requested Procedure Description
+    tag:
+    - 0x32
+    - 0x1060
+  - name: Study Comments
+    tag:
+    - 0x32
+    - 0x4000
+  - name: Referring Physician's Name
+    tag:
+    - 0x8
+    - 0x90
+  - name: Operators' Name
+    tag:
+    - 0x8
+    - 0x1070
+  - name: Scheduled Performing Physician's Name
+    tag:
+    - 0x40
+    - 0x6
+  - name: Other Patient Names
+    tag:
+    - 0x10
+    - 0x1001
   - name: Synchronization Frame of Reference UID
     tag:
     - 0x20
@@ -145,23 +354,103 @@ rules:
     tag:
     - 0x3006
     - 0xC2
-  - name: Study Time
+  - name: Additional Patient History
+    tag:
+    - 0x10
+    - 0x21B0
+  - name: Patient Comments
+    tag:
+    - 0x10
+    - 0x4000
+  - name: Medical Alerts
+    tag:
+    - 0x10
+    - 0x2000
+  - name: Comments on Radiation Dose
+    tag:
+    - 0x40
+    - 0x310
+  - name: Occupation
+    tag:
+    - 0x10
+    - 0x2180
+  - name: Acquisition Comments
+    tag:
+    - 0x18
+    - 0x4000
+  - name: Performed Station AE Title
+    tag:
+    - 0x40
+    - 0x241
+  - name: Scheduled Procedure Step Description
+    tag:
+    - 0x40
+    - 0x7
+  - name: Requested Procedure Comments
+    tag:
+    - 0x40
+    - 0x1400
+  - name: Clinical Trial Subject ID
+    tag:
+    - 0x12
+    - 0x40
+  - name: Code Meaning
     tag:
     - 0x8
-    - 0x30
+    - 0x104
+  - name: Text Value
+    tag:
+    - 0x40
+    - 0xA160
+  - name: Graphic Data
+    tag:
+    - 0x70
+    - 0x22
+  - name: Performed Procedure Step Description
+    tag:
+    - 0x40
+    - 0x254
+  - name: Private tag data
+    tag:
+    - 0x117
+    - 0x10C4
+  - name: Scheduled Study Location AE Title
+    tag:
+    - 0x32
+    - 0x1021
+  - name: Admitting Diagnoses Description
+    tag:
+    - 0x8
+    - 0x1080
+  - name: Irradiation Event UID
+    tag:
+    - 0x8
+    - 0x3010
+  - name: Private Creator
+    tag:
+    - 0x19
+    - 0x10
+  - name: Imaging Service Request Comments
+    tag:
+    - 0x40
+    - 0x2400
+  - name: Clinical Trial Site Name
+    tag:
+    - 0x12
+    - 0x31
   keywords:
   - Address
   - Telephone Numbers
   - Fax Numbers
   regex:
+  - \d\/\d{2}
   - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'
-  - \d{3}-\d{2}-\d{4}
-  - d{2}/\d{2}/\d{4}
-  - \d{2}.\d{2}.\d{4}
-  - \d{2}-\d{2}-\d{4}
+  - \d{5}(?:[-\s]\d{4})?
+  - \d{2}/\d{2}/\d{4}
   - \d{3}[-.\s]?d{7}
+  - \d{2}.\d{2}.\d{4}
+  - \d{3}-\d{2}-\d{4}
   - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}
   - \(\d{3}\)[\s]?\d{3}-\d{4}
-  - \d{5}(?:[-\s]\d{4})?
-  vr:
-  - PN
+  - '[a-zA-Z]{3}'
+  - \d{2}-\d{2}-\d{4}
