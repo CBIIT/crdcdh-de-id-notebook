@@ -73,42 +73,14 @@ rules:
     tag:
     - 0x18
     - 0x700C
-  - name: '[PET patient_datetime]'
-    tag:
-    - 0x9
-    - 0x1005
-  - name: '[PET scan_datetime]'
-    tag:
-    - 0x9
-    - 0x100D
   - name: '[PET scan_ready]'
     tag:
     - 0x9
     - 0x100E
-  - name: '[PET meas_datetime]'
-    tag:
-    - 0x9
-    - 0x1039
-  - name: '[PET admin_datetime]'
-    tag:
-    - 0x9
-    - 0x103B
-  - name: '[PET post_inj_datetime]'
-    tag:
-    - 0x9
-    - 0x103D
-  - name: '[PET landmark_datetime]'
-    tag:
-    - 0x9
-    - 0x1068
   - name: '[PET acq_start]'
     tag:
     - 0x9
     - 0x106C
-  - name: '[PET is_datetime]'
-    tag:
-    - 0x9
-    - 0x107B
   - name: Software Versions
     tag:
     - 0x18
