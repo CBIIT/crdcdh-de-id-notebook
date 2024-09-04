@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 from botocore.exceptions import ClientError
 from common.utils import process_dict_tags, get_date_time, dict2yaml, load_json_file, yaml2dict, generate_regex, save_dict_to_json, convert_json_to_csv
 from common.de_id_utils import get_pii_boxes
-from common.pixel_utils import parse_pixel_data, enhance_image
+from common.pixel_utils import parse_pixel_data, enhance_image, reverse_windowing
 from common.constants import DICOM_UID_MAP_JSON, EMPTY_STRING, PATIENT_ID_MAP_JSON, PATIENT_SEQUENCES_JSON, ANONYMIZED
 class ProcessMedImage:
     def __init__(self, boto3_session, rule_config_file_path, silence_mode = False):
