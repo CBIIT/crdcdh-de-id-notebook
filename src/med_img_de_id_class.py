@@ -15,17 +15,12 @@ class ProcessMedImage:
         """
         self.quiet = silence_mode
         self.boto3_session = boto3_session #get_boto3_session()
-        self.quiet = silence_mode
-        self.boto3_session = boto3_session #get_boto3_session()
         self.timestamp = get_date_time()
         self.data_time = get_date_time("%Y-%m-%d-%H-%M-%S")
         # self.role = get_sagemaker_execute_role(self.boto3_session)
         self.s3_client = self.boto3_session.client('s3') if self.boto3_session else None
-        # self.role = get_sagemaker_execute_role(self.boto3_session)
-        self.s3_client = self.boto3_session.client('s3') if self.boto3_session else None
         self.rekognition= None
         self.comprehend_medical = None
-        # set rules
         # set rules
         self.rule_config_file_path = rule_config_file_path
         self.rules = None
@@ -34,7 +29,6 @@ class ProcessMedImage:
         self.sensitive_words = None
         self.vr = None
         self.regex = None
-        self.confidence_threshold = None
         self.confidence_threshold = None
         self.set_rules(rule_config_file_path)
         # dicom data
@@ -161,7 +155,6 @@ class ProcessMedImage:
         """
         tags = []
         detected_elements = []
-        detected_elements = []
         all_ids = []
         ids_list = []
         ids = []
@@ -238,7 +231,6 @@ class ProcessMedImage:
         text = detected_text['DetectedText'] if is_image else detected_text
         phi_entities = self.analyze_text_for_phi(text)
         valid_entities = []
-        valid_entities = []
         if phi_entities and len(phi_entities) > 0:
             for entity in phi_entities:
                 if entity['Score'] > max(0.85, self.confidence_threshold/100): 
@@ -278,10 +270,9 @@ class ProcessMedImage:
             extracted_text = (len(detected_texts) > 0)
             if not extracted_text: return all_ids, extracted_text
             img_width, img_height = self.ds.Columns, self.ds.Rows  # Number of rows corresponds to the height
-            extracted_text = (len(detected_texts) > 0)
-            if not extracted_text: return all_ids, extracted_text
-            img_width, img_height = self.ds.Columns, self.ds.Rows  # Number of rows corresponds to the height
             for text in detected_texts:
+                # add rules
+                if text['DetectedText']  in ["LACH", "SWU"]: continue
                 # use Comprehend Medical detect PHI in text
                 # print(text)
                 ids = self.detect_id_in_text_AI(text, True)
