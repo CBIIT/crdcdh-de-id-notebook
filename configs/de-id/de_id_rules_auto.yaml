@@ -1,5 +1,5 @@
 rules:
-  confidence_threshold: 5
+  confidence_threshold: 80
   dicom_tags:
   - name: Patient's Name
     tag:
@@ -166,10 +166,6 @@ rules:
     tag:
     - 0x8
     - 0x100
-  - name: Code Value
-    tag:
-    - 0x8
-    - 0x100
   - name: Plate ID
     tag:
     - 0x18
@@ -222,10 +218,6 @@ rules:
     tag:
     - 0x40
     - 0x6
-  - name: Other Patient Names
-    tag:
-    - 0x10
-    - 0x1001
   - name: Additional Patient History
     tag:
     - 0x10
