@@ -12,6 +12,7 @@ def contains_name(text):
     if bool(re.search(REPEAT_CHAR_REGEX, text)) or any(keyword in text for keyword in keywords) or text.startswith('-') or text.startswith('_'):
         # print("Found invalid name: " + text)
         return False
+    if text.split(" ") < 2: return False
     # remove any non-alphanumeric characters
     text = re.sub(r'[^a-zA-Z\s]', '', text)
     # Parse the text as a potential human name
