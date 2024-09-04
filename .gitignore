@@ -142,9 +142,9 @@ ui-tests/.pnp.*
 # jupyter desktop 
 *workspace*
 *config.yaml
-data/*
 output/*
 src/common/sagemaker_config.py
 temp
 tmp
 images
+*mapping

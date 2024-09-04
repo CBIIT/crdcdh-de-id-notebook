@@ -1,7 +1,0 @@
-rules:
- dicom_tags: 
-    - tag: [0x0010,0x0010]
-      name: Patient's Name
-    - tag: [0x0010,0x0020]
-      name: Patient ID
-  

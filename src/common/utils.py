@@ -1,5 +1,11 @@
 import tarfile, json, re, requests, yaml, boto3, sys, csv
 from datetime import datetime 
+import os
+import shutil
+import matplotlib.pyplot as plt
+import os
+import shutil
+import matplotlib.pyplot as plt
 
 def untar_file(tar_file, dest_dir):
     """
@@ -137,4 +143,129 @@ def dump_dict_to_tsv(dict_list, file_path):
         dict_writer.writeheader()
         dict_writer.writerows(dict_list) 
     return True
+
+def dump_object_to_text(obj, file_path):
+    object_str = repr(obj)
+    with open(file_path, 'w') as output_file:
+        output_file.write(str(object_str))
+
+def dump_object_to_text(obj, file_path):
+    object_str = repr(obj)
+    with open(file_path, 'w') as output_file:
+        output_file.write(str(object_str))
+
+def generate_regex(data):
+    """
+    Generate a regular expression pattern from the given data.
+    """
+    pattern = ''
+    dataLength = len(data)
+    i = 0
+    
+    while i < dataLength:
+        char = data[i]
+        if isinstance(data, str) and char.isalpha():
+            start = i
+            while i < dataLength and data[i].isalpha():
+                i += 1
+            if i - start > 1:
+                pattern += '[a-zA-Z]{' + str(i - start) + '}'
+            else:
+                pattern += '[a-zA-Z]'
+        elif isinstance(data, str) and char.isdigit():
+            start = i
+            while i < dataLength and data[i].isdigit():
+                i += 1
+            if i - start > 1:
+                pattern += r'\d{' + str(i - start) + '}'
+            else:
+                pattern += r'\d'
+        elif isinstance(data, str) and char.isspace():
+            start = i
+            while i < dataLength and data[i].isspace():
+                i += 1
+            if i - start > 1:
+                pattern += r'\s{' + str(i - start) + '}'
+            else:
+                pattern += r'\s'
+        elif isinstance(data, bytes):
+            count = 1
+            while i + count < dataLength and data[i] == data[i + count]:
+                count += 1
+            if count == 1:
+                pattern += b'\\x' + format(data[i], '02x').encode('utf-8')
+            else:
+                pattern += b'\\x' + format(data[i], '02x').encode('utf-8') + b'{' + str(count).encode('utf-8') + b'}'
+            i += count
+        else:
+            pattern += escapeSpecialChar(char)
+            i += 1
+    return pattern
+
+def escapeSpecialChar(char):
+    """
+    Escape special characters in a string.
+    """
+    special = ".^$*+?()[]{}|\\"
+    return f"\\{char}" if not char in special else char
+
+def cleanup_dir(dirs):
+    """
+    Clean up directories
+    """
+    for dir in dirs:
+        if os.path.exists(dir) and os.path.isdir(dir):
+            if os.path.exists(dir):
+                shutil.rmtree(dir)
+        os.makedirs(dir)
+
+def convert_basetag(base_tag):
+    if base_tag and base_tag > 0:
+        return ((base_tag >> 16) & 0xFFFF, base_tag & 0xFFFF)
+    
+def draw_img(img):
+    if img is None: 
+        print("Image is empty!")
+        return
+    """
+    draw pillow image
+    """
+    #Set the image color map to grayscale, turn off axis graphing, and display the image
+    plt.rcParams["figure.figsize"] = [16,9]
+    # Display the image
+    plt.imshow(img, cmap=plt.cm.gray)
+    plt.title('DICOM Image')
+    plt.axis('off')  # Turn off the axis
+    plt.show()
+
+def load_json_file(file_path):
+    """
+    load json file
+    """
+    try:
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+    
+def save_dict_to_json(dict, output_file_path):
+    """
+    Save dicom uid map to json file.
+    """
+    with open(output_file_path, 'w') as fp:
+        json.dump(dict, fp)
+
+def convert_json_to_csv(json_file, csv_file, cols = ["id_old", "id_new"]):
+    """
+    Convert json file to csv file
+    """
+    with open(json_file, 'r') as json_file:
+        data = json.load(json_file)
+
+    with open(csv_file, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(cols)
+        for key, value in data.items():
+            writer.writerow([key, value])
+
 

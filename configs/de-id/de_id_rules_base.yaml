@@ -1,0 +1,51 @@
+rules:
+  dicom_tags:  #PHI info in DICOM metadata by element tag
+      - tag:  [0x0010,0x0010]
+        name: Patient's Name
+      - tag:  [0x0010,0x0020]
+        name: Patient ID
+      - tag:  [0x0010,0x0040] 0010, 0040
+        name: Patient's Sex
+      - tag:  [0x0010,0x1010]
+        name: Patient's Age
+      - tag:  [0x0010,0x1020]
+        name: Patient's Size
+      - tag:  [0x0010,0x1030]
+        name: Patient's Weight
+      - tag:  [0x0010,0x1060]
+        name: Patient's Insurance Plan
+      - tag:  [0x0010,0x1070]
+        name: Patient's Relationship Status
+      - tag:  [0x0010,0x1000]
+        name: Other Patient IDs
+      - tag:  [0x0010,0x1001] 
+        name: Other Patient Names  
+      - tag:  [0x0020,0x000D]
+        name: Study Instance UID
+      - tag:  [0x0020,0x0010]
+        name: Study ID
+      - tag:  [0x0020,0x000E]
+        name: Series Instance UID
+      - tag:  [0x0008,0x0018]
+        name: SOP Instance UID
+      - tag:  [0x0020,0x0052]
+        name: Frame of Reference UID
+      - tag:  [0x0008,0x1155]
+        name: Reference SOP Instance UID
+  keywords: # detect PHI info in DICOM metadata by element name
+      - 'Address'
+      - 'Telephone Numbers'
+      - 'Fax Numbers'
+  regex: # patterns to detect PHI info in DICOM pixel data
+      # - (?!.*[\d:;,])[A-Z][a-z]+(?:[ '-][A-Z][a-z]+|\.[A-Z])*[a-z]* #human name
+      - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}' #email
+      - \d{3}-\d{2}-\d{4} # SSN, Driver's License, Insurance Policy Number, Medical Record Number, Health Insurance Card Number
+      - \d{2}/\d{2}/\d{4}  # Date (MM/DD/YYYY)
+      - \d{2}.\d{2}.\d{4}  # Date (MM.DD.YYYY)
+      - \d{2}-\d{2}-\d{4} # Date (DD-MM-YYYY)
+      - \d{3}[-.\s]?d{7}  # Phone Number
+      - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}  # Phone Number
+      - \(\d{3}\)[\s]?\d{3}-\d{4}  # Phone Number
+      - \d{5}(?:[-\s]\d{4})?  # Zip Code
+  # confidence threshold for detecting PHI info in DICOM metadata and for extract text from pixel data
+  confidence_threshold: 80
