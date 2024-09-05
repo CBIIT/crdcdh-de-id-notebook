@@ -138,7 +138,10 @@ class ProcessMedImage:
                 elif "DateTime" in name:
                     redacted_value = "00010101010101.000000+0000"
                 elif "time stamp" in name:
-                    redacted_value = "0000000000"
+                    if vr == "SL":
+                        redacted_value = 0
+                    else:
+                        redacted_value = "0000000000"
                 else:
                     redacted_value = "None"
             if redacted_value != "None":
