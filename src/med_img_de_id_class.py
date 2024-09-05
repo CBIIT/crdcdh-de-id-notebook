@@ -131,10 +131,14 @@ class ProcessMedImage:
             tuple = (item.tag.group, item.tag.element)
             in_keywords = [key for key in self.sensitive_words if key in name]
             if len(in_keywords) > 0:
-                redacted_value = EMPTY_STRING
+                redacted_value = None
             else:
-                if tuple in self.phi_tags or vr in ["UI",  "PN", "DA", "DT", "TM"] :
+                if tuple in self.phi_tags or vr in ["UI", "PN", "DA", "DT", "TM"]:
                     redacted_value = self.redact_tag_value(item.value, tuple, vr)
+                elif "DateTime" in name:
+                    redacted_value = "00010101010101.000000+0000"
+                elif "time stamp" in name:
+                    redacted_value = "0000000000"
                 else:
                     redacted_value = "None"
             if redacted_value != "None":
@@ -143,8 +147,6 @@ class ProcessMedImage:
                 item.value = redacted_value
                 detected_tags.append(tuple)
                 redacted += 1
-               
-
         if not self.quiet:
             print(f"Redacted DICOM matadata")
         return redacted, detected_tags
@@ -425,12 +427,17 @@ class ProcessMedImage:
             return value
         elif vr:
             if vr in ["LO", "LT", "SH", "PN", "ST", "UT", "AE"]:
-                return ANONYMIZED
+                return None
             elif vr == "UI":
-                new_uid = pydicom.uid.generate_uid()
-                self.dicom_uid_map[value] = new_uid
-                return new_uid
+                if value in self.dicom_uid_map:
+                    return self.dicom_uid_map[value]
+                else:
+                    mapped_val = pydicom.uid.generate_uid()
+                    self.dicom_uid_map[value] = mapped_val
+                return mapped_val
             elif vr in ["SH", "AS", "CS"]:
+                if tag in [(0x0018, 0x1078), (0x0018, 0x1079)] or "DateTime" in value:
+                    return  "00010101010101.000000+0000"
                 return EMPTY_STRING
             elif vr in ["UL", "FL", "FD", "SL", "SS", "US"]:
                 return 0

@@ -9,22 +9,6 @@ rules:
     tag:
     - 0x10
     - 0x20
-  - name: Patient's Sex
-    tag:
-    - 0x10
-    - 0x40
-  - name: Patient's Age
-    tag:
-    - 0x10
-    - 0x1010
-  - name: Patient's Size
-    tag:
-    - 0x10
-    - 0x1020
-  - name: Patient's Weight
-    tag:
-    - 0x10
-    - 0x1030
   - name: Patient's Insurance Plan
     tag:
     - 0x10
@@ -53,14 +37,6 @@ rules:
     tag:
     - 0x18
     - 0x1012
-  - name: Secondary Capture Device Software Versions
-    tag:
-    - 0x18
-    - 0x1019
-  - name: Study Description
-    tag:
-    - 0x8
-    - 0x1030
   - name: '[The Acquisition Date of NRA]'
     tag:
     - 0x7005
@@ -81,91 +57,14 @@ rules:
     tag:
     - 0x9
     - 0x106C
-  - name: Software Versions
-    tag:
-    - 0x18
-    - 0x1020
   - name: Date of Last Calibration
     tag:
     - 0x18
     - 0x1200
-  - name: '[PET exam_id]'
-    tag:
-    - 0x9
-    - 0x1007
-  - name: '[PET for_identifier]'
-    tag:
-    - 0x9
-    - 0x1013
-  - name: '[PET normal_cal_id]'
-    tag:
-    - 0x9
-    - 0x1056
-  - name: '[PET normal_2d_cal_id]'
-    tag:
-    - 0x9
-    - 0x1057
-  - name: '[PET frame_id]'
-    tag:
-    - 0x9
-    - 0x105C
-  - name: '[PET exam_id]'
-    tag:
-    - 0x9
-    - 0x105E
-  - name: '[PET norm_cal_id]'
-    tag:
-    - 0x9
-    - 0x1098
-  - name: Manufacturer's Model Name
-    tag:
-    - 0x8
-    - 0x1090
-  - name: Pixel Intensity Relationship
-    tag:
-    - 0x28
-    - 0x1040
-  - name: Rescale Type
-    tag:
-    - 0x28
-    - 0x1054
-  - name: '[PET scan_id]'
-    tag:
-    - 0x9
-    - 0x100A
-  - name: '[PET wc_cal_id]'
-    tag:
-    - 0x9
-    - 0x1059
-  - name: '[PET scan_id]'
-    tag:
-    - 0x9
-    - 0x105D
-  - name: '[PET trans_scan_id]'
-    tag:
-    - 0x9
-    - 0x1097
-  - name: '[PET trans_frame_id]'
-    tag:
-    - 0x9
-    - 0x10AD
-  - name: Device Serial Number
-    tag:
-    - 0x18
-    - 0x1000
-  - name:
-    - SlicePosition_PCS
-    tag:
-    - 0x19
-    - 0x1015
   - name: Image Comments
     tag:
     - 0x20
     - 0x4000
-  - name: Code Value
-    tag:
-    - 0x8
-    - 0x100
   - name: Plate ID
     tag:
     - 0x18
@@ -182,26 +81,10 @@ rules:
     tag:
     - 0x40
     - 0x1001
-  - name: Coding Scheme Designator
-    tag:
-    - 0x8
-    - 0x102
   - name: Retrieve AE Title
     tag:
     - 0x8
     - 0x54
-  - name: Series Description
-    tag:
-    - 0x8
-    - 0x103E
-  - name: Protocol Name
-    tag:
-    - 0x18
-    - 0x1030
-  - name: Requested Procedure Description
-    tag:
-    - 0x32
-    - 0x1060
   - name: Study Comments
     tag:
     - 0x32
@@ -218,14 +101,6 @@ rules:
     tag:
     - 0x40
     - 0x6
-  - name: Additional Patient History
-    tag:
-    - 0x10
-    - 0x21B0
-  - name: Patient Comments
-    tag:
-    - 0x10
-    - 0x4000
   - name: Medical Alerts
     tag:
     - 0x10
@@ -246,38 +121,10 @@ rules:
     tag:
     - 0x40
     - 0x241
-  - name: Scheduled Procedure Step Description
-    tag:
-    - 0x40
-    - 0x7
-  - name: Requested Procedure Comments
-    tag:
-    - 0x40
-    - 0x1400
   - name: Clinical Trial Subject ID
     tag:
     - 0x12
     - 0x40
-  - name: Code Meaning
-    tag:
-    - 0x8
-    - 0x104
-  - name: Text Value
-    tag:
-    - 0x40
-    - 0xA160
-  - name: Graphic Data
-    tag:
-    - 0x70
-    - 0x22
-  - name: Performed Procedure Step Description
-    tag:
-    - 0x40
-    - 0x254
-  - name: Private tag data
-    tag:
-    - 0x117
-    - 0x10C4
   - name: Scheduled Study Location AE Title
     tag:
     - 0x32
@@ -294,23 +141,53 @@ rules:
     tag:
     - 0x40
     - 0x2400
-  - name: Clinical Trial Site Name
+  - name: [PC Velocity]
     tag:
-    - 0x12
-    - 0x31
+    - 0x2001
+    - 0x101A
+  - name: Study ID
+    tag:
+    - 0x10
+    - 0x20
+  - name: [PMTF Information 1]
+    tag:
+    - 0x29
+    - 0x1131
   keywords:
   - Address
   - Telephone Numbers
   - Fax Numbers
+  - Suite id
+  - Series Number
+  - Series Date
+  - Series from which Prescribed
+  - Series from which prescribed
+  - Slop_int_10...slop_int_17
+  - Clinical Trial Site Name
+  - Clinical Trial Protocol ID
+  - Clinical Trial Protocol Name
+  - Clinical Trial Site ID
+  - Clinical Trial Time Point ID
+  - Clinical Trial Time Point Description
+  - Series Number
+  - Verifying Observer Name
+  - Person Name
+  - Content Creator's Name
+  - Station Name
+  - PET batch_description
+  - Coil ID Data
+  - Physician(s) of Record
+  - Service id
+  - Img is original or unoriginal
   regex:
-  - \d\/\d{2}
-  - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'
-  - \d{5}(?:[-\s]\d{4})?
-  - \d{2}/\d{2}/\d{4}
-  - \d{3}[-.\s]?d{7}
-  - \d{2}.\d{2}.\d{4}
-  - \d{3}-\d{2}-\d{4}
-  - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}
-  - \(\d{3}\)[\s]?\d{3}-\d{4}
   - '[a-zA-Z]{3}'
   - \d{2}-\d{2}-\d{4}
+  - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}
+  - \d{3}[-.\s]?d{7}
+  - \d{2}/\d{2}/\d{4}
+  - \d{3}-\d{2}-\d{4}
+  - \(\d{3}\)[\s]?\d{3}-\d{4}
+  - \d{2}.\d{2}.\d{4}
+  - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'
+  - \d\/\d{2}
+  - \d{5}(?:[-\s]\d{4})?
