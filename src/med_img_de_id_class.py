@@ -8,6 +8,34 @@ from common.utils import process_dict_tags, get_date_time, dict2yaml, load_json_
 from common.de_id_utils import get_pii_boxes
 from common.pixel_utils import parse_pixel_data, enhance_image, reverse_windowing
 from common.constants import DICOM_UID_MAP_JSON, EMPTY_STRING, PATIENT_ID_MAP_JSON, PATIENT_SEQUENCES_JSON, ANONYMIZED
+
+SKIP_EVALUATION_TAGS = [
+    (0x7FE0, 0x0010),  #pixel data, vr = OW
+    ((0x6000, 0x3000)), #overlay pixel data, vr = OW
+    (0x0008, 0x1030), #study description
+    (0x0008, 0x103e), #series description
+    (0x0010, 0x0040), #patient sex
+    (0x0010, 0x1010), #patient age
+    (0x0010, 0x1020), #patient size
+    (0x0010, 0x1030), #patient weight
+    (0x0008, 0x0020), #study date
+    (0x0008, 0x0030), #study time
+    (0x0008, 0x0050), #accession number
+    (0x0008, 0x0060), #modality
+    (0x0008, 0x0064), #conversion type
+    (0x0008, 0x0070), #manufacturer
+    (0x0008, 0x0080), #institution name
+    (0x0008, 0x0090), #referring physician name
+    (0x0008, 0x1010), #station name
+    (0x0008, 0x1030), #study description
+    (0x0008, 0x103e), #series description
+    (0x0010, 0x21b0), #Additional Patient History 
+    (0x0018, 0x1030), #Protocol Name 
+    (0x0018, 0x1000), # Device Serial Number 
+    (0x0020, 0x0010), # Study ID 
+    (0x0032, 0x1060), #Requested Procedure Description 
+    (0x0040, 0x0007), #Scheduled Procedure Step Description  
+]
 class ProcessMedImage:
     def __init__(self, boto3_session, rule_config_file_path, silence_mode = False):
         """
@@ -133,7 +161,9 @@ class ProcessMedImage:
             if len(in_keywords) > 0:
                 redacted_value = None
             else:
-                if tuple in self.phi_tags or vr in ["UI", "PN", "DA", "DT", "TM"]:
+                if name in  ["Referenced SOP Class UID", "SOP Class UID"]:
+                    continue
+                if tuple in self.phi_tags or vr in ["UI", "PN", "DA", "DT"]:
                     redacted_value = self.redact_tag_value(item.value, tuple, vr)
                 elif "DateTime" in name:
                     redacted_value = "00010101010101.000000+0000"
@@ -172,9 +202,8 @@ class ProcessMedImage:
             tuple = (item.tag.group, item.tag.element)
             # Escape pixel data, redacted values, pixel data tags
             if item.value in [None, 'None', "", "none", EMPTY_STRING, ANONYMIZED, 0, "0", b"ANONYMIZED"] \
-                or item.VR in ["OW","UI", "PN", "DA", "DT", "TM"] or tuple in [(0x7FE0, 0x0010), ((0x6000, 0x3000))]: 
+                or item.VR in ["OW","UI", "PN", "DA", "DT", "TM"] or tuple in [(0x7FE0, 0x0010), ((0x6000, 0x3000)),(0x0008, 0x1030),(0x0008, 0x103e)]: 
                 continue 
-            tuple = None
             if isinstance(item.value, str):
                 ids = self.detect_id_in_text_AI(item.value, is_image=False)
                 if ids and len(ids) > 0:
@@ -277,7 +306,7 @@ class ProcessMedImage:
             img_width, img_height = self.ds.Columns, self.ds.Rows  # Number of rows corresponds to the height
             for text in detected_texts:
                 # add rules
-                if text['DetectedText']  in ["LACH", "SWU"]: continue
+                if text['DetectedText']  in ["LACH", "SWU", "4/12"]: continue
                 # use Comprehend Medical detect PHI in text
                 # print(text)
                 ids = self.detect_id_in_text_AI(text, True)
@@ -398,21 +427,34 @@ class ProcessMedImage:
             return 'Content^Creator'
         elif tag == (0x0008, 0x103e):  # Series Description
             return 'Series^Description'
+        elif tag in [(0x0040, 0x0007), (0x0032, 0x1060)]:
+            if "Dr." in value:
+                return ANONYMIZED
+            else:
+                return value
+        elif tag == (0x0008,0x0016): #retain SOP UID
+            return value
         elif tag == (0x0020, 0x000d): #Study Instance UID 
-            if self.ds.StudyInstanceUID in self.dicom_uid_map:
-                self.studyInstanceUID = self.dicom_uid_map[self.ds.StudyInstanceUID]
-                return self.dicom_uid_map[self.ds.StudyInstanceUID]
+            if value == self.studyInstanceUID: 
+                print(f"studyInstanceUID has already redacted {self.local_dicom_path}")
+                return value #already redacted
+            if value in self.dicom_uid_map:
+                self.studyInstanceUID = self.dicom_uid_map[value]
+                return self.studyInstanceUID
             else:
                 self.studyInstanceUID = pydicom.uid.generate_uid()
-                self.dicom_uid_map[self.ds.StudyInstanceUID] = self.studyInstanceUID
+                self.dicom_uid_map[value] = self.studyInstanceUID
                 return self.studyInstanceUID
         elif tag == (0x0020,0x000E): #Series Instance UID
-            if self.ds.SeriesInstanceUID in self.dicom_uid_map:
-                self.seriesInstanceUID = self.dicom_uid_map[self.ds.SeriesInstanceUID]
-                return self.dicom_uid_map[self.ds.SeriesInstanceUID]
+            if value == self.seriesInstanceUID: 
+                print(f"seriesInstanceUID has already redacted {self.local_dicom_path}")
+                return value #already redacted
+            if value in self.dicom_uid_map:
+                self.seriesInstanceUID = self.dicom_uid_map[value]
+                return self.seriesInstanceUID
             else:
                 self.seriesInstanceUID = pydicom.uid.generate_uid()
-                self.dicom_uid_map[self.ds.SeriesInstanceUID] = self.seriesInstanceUID
+                self.dicom_uid_map[value] = self.seriesInstanceUID
                 return self.seriesInstanceUID 
         elif tag == (0x0019, 0x1015): #[SlicePosition_PCS] 
             return None
@@ -453,7 +495,7 @@ class ProcessMedImage:
             elif vr == "DT":
                 return  "00010101010101.000000+0000"
             elif vr == "TM":
-                return "000000.00"
+                return value
         else:
             return None
         
