@@ -1515,12 +1515,12 @@ rules:
     tag:
     - 0x10
     - 0x2154
-  - name: Patient Comments
-    # Z
-    action: X
-    tag:
-    - 0x10
-    - 0x4000
+  # - name: Patient Comments
+  #   # Z
+  #   action: X
+  #   tag:
+  #   - 0x10
+  #   - 0x4000
   - name: Patient ID
     # Z/D
     action: D
@@ -2803,7 +2803,7 @@ rules:
   - PET type
   - PET total_prompts
   - Scheduled Procedure Step ID
-  - Device Serial Number
+  # - Device Serial Number
   - Slop_int_10...slop_int_17 #None
   - Start time(secs) in first axial
   - Image actual date
@@ -2831,10 +2831,12 @@ rules:
   - Comments on Radiation Dose
   - Requested Procedure Comments
   - Scheduled Procedure Step Description
+  - Patient Comments
 
   skip_uid:
   - Referenced SOP Class UID 
   - SOP Class UID
+  - Referenced SOP Instance UID
 
   regex:
   - \d{2}.\d{2}.\d{4}

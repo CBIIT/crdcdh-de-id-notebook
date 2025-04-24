@@ -4,11 +4,13 @@ import re
 import numpy as np
 from PIL import Image, ImageDraw
 from botocore.exceptions import ClientError
-from common.utils import process_dict_tags, get_date_time, dict2yaml, load_json_file, yaml2dict, generate_regex, save_dict_to_json, convert_json_to_csv
+from common.utils import process_dict_tags, get_date_time, dict2yaml, load_json_file, yaml2dict, generate_regex, save_dict_to_json, convert_json_to_csv, \
+        match_date, match_name, match_phone, match_address
 from common.de_id_utils import get_pii_boxes
 from common.pixel_utils import parse_pixel_data, enhance_image, reverse_windowing
 from common.constants import DICOM_UID_MAP_JSON, EMPTY_STRING, PATIENT_ID_MAP_JSON, PATIENT_SEQUENCES_JSON, ANONYMIZED
 
+ANONYMIZED = "^ANONYMIZED"
 SKIP_EVALUATION_TAGS = [
     (0x7FE0, 0x0010),  #pixel data, vr = OW
     ((0x6000, 0x3000)), #overlay pixel data, vr = OW
@@ -79,10 +81,12 @@ class ProcessMedImage:
         # Load the rules from the YAML file
         self.rules = yaml2dict(rule_config_file_path)["rules"]
         self.dicom_tags = self.rules['dicom_tags']
-        self.phi_tags = set([ tuple(item["tag"]) for item in self.dicom_tags ])
+        self.phi_tags = {tuple(item["tag"]):item["action"].upper() for item in self.dicom_tags if item.get("action", "").upper() in ["X", "Z", "D"]}
         # print(self.phi_tags)
         self.sensitive_words = self.rules['keywords']
         # print(self.sensitive_words)
+        self.condition_remove = self.rules['condition_remove']
+        self.skip_uid = self.rules['skip_uid']
         self.regex = set(self.rules['regex'])
         self.confidence_threshold = int(self.rules['confidence_threshold'])
         self.pii_patterns = re.compile(r'\b(?:{0})\b'.format('|'.join(self.regex)))
@@ -157,33 +161,192 @@ class ProcessMedImage:
             if item.value in [None, 'None', "", "none"] or vr in ["OW"]: continue 
             name = item.name
             tuple = (item.tag.group, item.tag.element)
-            in_keywords = [key for key in self.sensitive_words if key in name]
-            if len(in_keywords) > 0:
-                redacted_value = None
-            else:
-                if name in  ["Referenced SOP Class UID", "SOP Class UID"]:
-                    continue
-                if tuple in self.phi_tags or vr in ["UI", "PN", "DA", "DT"]:
-                    redacted_value = self.redact_tag_value(item.value, tuple, vr)
-                elif "DateTime" in name:
-                    redacted_value = "00010101010101.000000+0000"
-                elif "time stamp" in name:
-                    if vr == "SL":
-                        redacted_value = 0
-                    else:
-                        redacted_value = "0000000000"
-                else:
-                    redacted_value = "None"
+            redacted_value = self.redact_tag_by_rules(tuple, vr, name, item.value)
             if redacted_value != "None":
                 if not self.quiet:
                     print(f"Tag: {item} - Redacted Value: {redacted_value}") 
                 item.value = redacted_value
                 detected_tags.append(tuple)
                 redacted += 1
+        self.add_missing_tag()
         if not self.quiet:
             print(f"Redacted DICOM matadata")
         return redacted, detected_tags
+    
+    def add_missing_tag(self):
+        # (0008,0068) Presentation Intent Type
+        tag = (0x0008,0x0068)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "FOR PRESENTATION")
+        # Acquisition Number
+        tag = (0x0020,0x0012)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "IS", "")
+        # <(0018,7004)>	<Detector Type>
+        tag = (0x0018,0x7004)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "DIRECT")
+        # <(0020,0062)>	<Image Laterality>
+        tag = (0x0020,0x0062)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "U")
+        # <(0018,0060)>	<KVP>
+        tag = (0x0018,0x0060)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "DS", "")
+        # <(0028,1041)>	<Pixel Intensity Relationship Sign>
+        tag = (0x0028, 0x1041)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "SIGN")
+        # <(0020,1040)>	<Position Reference Indicator>
+        tag = (0x0020, 0x1040)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "")
+        # <(2050,0020)>	<Presentation LUT Shape>
+        tag = (0x2050, 0x0020)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "SQUARE")
+        # <(0018,1164)>	<Imager Pixel Spacing>
+        tag = (0x0018, 0x1164) 
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "DS", "")
+        # <(0028,1040)>	<Pixel Intensity Relationship>
+        tag = (0x0028, 0x1040)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "LOG")
+        # <(0028,1054)>	<Rescale Type>
+        tag = (0x0028, 0x1054)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "HU")
 
+        tag = (0x2001,0x0010) #<Private Creator><Philips Imaging DD 001>
+        if tag in self.ds:
+            tag = (0x2001,0x0013)
+            if not tag in self.ds:
+                self.ds[tag] = pydicom.dataset.DataElement(tag, "LO", "Philips MR Imaging DD 004")
+            tag = (0x2001,0x0014)
+            if not tag in self.ds:
+                self.ds[tag] = pydicom.dataset.DataElement(tag, "LO", "Philips MR Imaging DD 005")
+
+    
+    def redact_tag_by_rules(self, tuple, vr, name, value):
+        redacted_value = "None"
+        # 1) check if the tag is in the dicom_tags
+        if tuple in self.phi_tags:
+            # check if action is remove
+            if self.phi_tags[tuple] == 'X':
+                if tuple in self.ds:
+                    del self.ds[tuple]
+                    if not self.quiet:
+                        print(f"Tag: {name} - removed")
+                    return "None"
+            else:
+                return self.redact_tag_value(value, tuple, vr)
+        # rename private creator
+        if name == ("Private Creator"):
+            if str(value).isdigit() and len(str(value)) == 14:
+                return "GEMS_PETD_01"
+        # set not_null value
+        if tuple == (0x0020,0x0062): #Image Laterality
+            if not value:
+                return "U"
+        if tuple == (0x0008,0x0008): #Image Type
+            if not value:
+                return "ORIGINAL"
+        if tuple == (0x0008,0x0068): #Presentation Intent Type
+            if not value:
+                return "FOR PRESENTATION"
+        # if name == "[Unknown]":
+        #     if value == "AP":
+        #         return "10"
+        #     if value == "FH":
+        #         return "1"
+        #     if value == "RL":
+        #         return "9"
+        # remove tag by name
+        temp = [key for key in self.sensitive_words if key in name]
+        if temp:
+            if isinstance(value, str):
+                return EMPTY_STRING
+            else:
+                return None
+        # conditional remove
+        temp = [key for key in self.condition_remove if key in name]
+        if temp:
+            if isinstance(value, str):
+                if str(value).isdigit():
+                    if match_date(str(value)):
+                        return "00010101" if len(value) == 8 else "00010101010101"
+                    elif match_phone(value):
+                        return EMPTY_STRING
+                # usd connection word
+                split_list = [" for ", " at ", " on "]
+                for split in split_list:
+                    if split in value:
+                        temp_list = value.split(split)
+                        if len(temp_list) >= 2:
+                            if "Admitted to" in temp_list[0]:
+                                return ANONYMIZED
+                            else:
+                                return temp_list[0]
+                split_list = [" : ", ":", "_", " "]
+                for split in split_list:
+                    if split in value:
+                        match, val = self.check_phi_in_text(split, value)
+                        if match:
+                            return val
+                address = match_address(value)
+                if address:
+                    return EMPTY_STRING
+                if name == "Text Value":
+                    if value in ["DL", "KM", "RS"]:
+                        return EMPTY_STRING
+                    
+            elif str(value).isdigit():
+                if match_date(str(value)):
+                    return 0
+
+        # redact based VR
+        if vr == "UI" and name not in self.skip_uid:
+            if value in self.dicom_uid_map:
+                return self.dicom_uid_map[value]
+            else:
+                mapped_val = pydicom.uid.generate_uid()
+                self.dicom_uid_map[value] = mapped_val
+                return mapped_val
+        if vr == "DA":
+            return "00010101"
+        if vr == "DT":
+            return  "00010101010101.000000+0000"
+
+        return redacted_value
+
+    def check_phi_in_text(self, split, value):
+        matched = False
+        temp_list = value.split(split)
+        rtn_val_list = []
+        for temp in temp_list:
+            # match name
+            name = match_name(temp)
+            if name:
+                matched = True
+                continue
+            address = match_address(temp)
+            if address:
+                matched = True
+                continue
+            phone, val = match_phone(temp)
+            if phone:
+                matched = True
+                rtn_val_list.append(val)
+                continue
+            date = match_date(temp)
+            if date:
+                matched = True
+                continue
+            rtn_val_list.append(temp)
+        return matched, split.join(rtn_val_list)
+        
     def detect_id_in_tags(self):
         """
         detect PHI info in DICOM by Comprehend Medical
@@ -306,10 +469,13 @@ class ProcessMedImage:
             img_width, img_height = self.ds.Columns, self.ds.Rows  # Number of rows corresponds to the height
             for text in detected_texts:
                 # add rules
-                if text['DetectedText']  in ["LACH", "SWU", "4/12"]: continue
+                if text['DetectedText'] in ["LACH", "4/12"]: continue
+                if "DOB:" in text['DetectedText'] or "LACI" in text['DetectedText'] or "SWU" in text['DetectedText'] or "RCn" in text['DetectedText']: 
+                    ids = text['DetectedText'] 
                 # use Comprehend Medical detect PHI in text
                 # print(text)
-                ids = self.detect_id_in_text_AI(text, True)
+                else:
+                    ids = self.detect_id_in_text_AI(text, True)
                 if ids and len(ids) > 0:
                     box = text['Geometry']['BoundingBox']
                     left = img_width * box['Left']
@@ -407,6 +573,13 @@ class ProcessMedImage:
     def redact_tag_value(self, value, tag, vr = None):
         if value in [None, 'None', "", "none"]: return value
         """Function to replace sensitive data with placeholders or anonymous values."""
+        action = self.phi_tags[tag]
+        if action.upper() in ["X", "Z"]:
+            if isinstance(value, str):
+                return EMPTY_STRING
+            else:
+                return None
+
         if tag == (0x0010, 0x0020):  # Patient ID
             if value in self.patient_id_map:
                 self.patient_id = self.patient_id_map[value]
@@ -425,39 +598,31 @@ class ProcessMedImage:
             return 'Mr.^Observer'
         elif tag == (0x0070, 0x0084): # content creator's name
             return 'Content^Creator'
-        elif tag == (0x0008, 0x103e):  # Series Description
-            return 'Series^Description'
-        elif tag in [(0x0040, 0x0007), (0x0032, 0x1060)]:
-            if "Dr." in value:
-                return ANONYMIZED
-            else:
-                return value
-        elif tag == (0x0008,0x0016): #retain SOP UID
-            return value
+        # elif tag == (0x0008, 0x103e):  # Series Description
+        #     return 'Series^Description'
+        # elif tag in [(0x0040, 0x0007), (0x0032, 0x1060)]:
+        #     if "Dr." in value:
+        #         return ANONYMIZED
+        #     else:
+        #         return value
+        # elif tag == (0x0008,0x0016): #retain SOP UID
+        #     return value
         elif tag == (0x0020, 0x000d): #Study Instance UID 
-            if value == self.studyInstanceUID: 
-                print(f"studyInstanceUID has already redacted {self.local_dicom_path}")
-                return value #already redacted
-            if value in self.dicom_uid_map:
-                self.studyInstanceUID = self.dicom_uid_map[value]
-                return self.studyInstanceUID
+            if self.ds.StudyInstanceUID in self.dicom_uid_map:
+                self.studyInstanceUID = self.dicom_uid_map[self.ds.StudyInstanceUID]
+                return self.dicom_uid_map[self.ds.StudyInstanceUID]
             else:
                 self.studyInstanceUID = pydicom.uid.generate_uid()
-                self.dicom_uid_map[value] = self.studyInstanceUID
+                self.dicom_uid_map[self.ds.StudyInstanceUID] = self.studyInstanceUID
                 return self.studyInstanceUID
         elif tag == (0x0020,0x000E): #Series Instance UID
-            if value == self.seriesInstanceUID: 
-                print(f"seriesInstanceUID has already redacted {self.local_dicom_path}")
-                return value #already redacted
-            if value in self.dicom_uid_map:
-                self.seriesInstanceUID = self.dicom_uid_map[value]
-                return self.seriesInstanceUID
+            if self.ds.SeriesInstanceUID in self.dicom_uid_map:
+                self.seriesInstanceUID = self.dicom_uid_map[self.ds.SeriesInstanceUID]
+                return self.dicom_uid_map[self.ds.SeriesInstanceUID]
             else:
                 self.seriesInstanceUID = pydicom.uid.generate_uid()
-                self.dicom_uid_map[value] = self.seriesInstanceUID
+                self.dicom_uid_map[self.ds.SeriesInstanceUID] = self.seriesInstanceUID
                 return self.seriesInstanceUID 
-        elif tag == (0x0019, 0x1015): #[SlicePosition_PCS] 
-            return None
         elif isinstance(value, list):
             for item in value:
                 if isinstance(item, str):
@@ -479,15 +644,13 @@ class ProcessMedImage:
                 else:
                     mapped_val = pydicom.uid.generate_uid()
                     self.dicom_uid_map[value] = mapped_val
-                return mapped_val
+                    return mapped_val
             elif vr in ["SH", "AS", "CS"]:
                 if tag in [(0x0018, 0x1078), (0x0018, 0x1079)] or "DateTime" in value:
                     return  "00010101010101.000000+0000"
                 return EMPTY_STRING
-            elif vr in ["UL", "FL", "FD", "SL", "SS", "US"]:
+            elif vr in ["UL", "FL", "FD", "SL", "SS", "US", "DS", "IS"]:
                 return 0
-            elif vr in ["DS", "IS"]:
-                return "0"
             elif vr == "UN":
                 return b"ANONYMIZED"
             elif vr == "DA":

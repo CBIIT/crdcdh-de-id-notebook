@@ -281,16 +281,16 @@ def convert_json_to_csv(json_file, csv_file, cols = ["id_old", "id_new"]):
             writer.writerow([key, value])
 
 def match_date(date_str):
-    pattern_10 = r"\b(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\b"  #date in format of yyyymmdd
+    pattern_8 = r"\b(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\b"  #date in format of yyyymmdd
     pattern_14 = r"\b(19\d{2}|20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])([01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]\b"  #datetime in the format of yyyymmddhhMMss
-    return re.match(pattern_10, date_str) if len(date_str) == 10 else re.match(pattern_14, date_str)
+    return re.match(pattern_8, date_str.strip()) if len(date_str.strip()) == 8 else re.match(pattern_14, date_str)
 
 def match_name(name):
     pattern = r'\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b'
     if " " in name.strip() and len(name.strip().split(" ")) == 2:
-        return re.match(pattern, name)
+        return re.match(pattern, name.strip())
     else:
-        return False
+        return None
     
 def match_phone(phone):
     pattern = r'\b\d{10}\b'
@@ -298,12 +298,13 @@ def match_phone(phone):
     if match:
         return True, re.sub(pattern, "", phone).strip()
     else:
-        return False, phone
-
+        pattern = r'^\+1-\d{3}-\d{3}-\d{4}$'
+        match = re.match(pattern, phone.strip())
+        if match:
+            return True, re.sub(pattern, "", phone).strip()
+        else:
+            return False, phone
+        
 def match_address(address):
     pattern = r'\b\d+\s+[A-Za-z]+\s+[A-Za-z]+\s+(?:St|Ave|Blvd|Rd|Dr|Ln|Ct|Way|Pl)\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
-    match = re.match(pattern, address.strip())
-    if match:
-        return re.sub(pattern, "", address).strip()
-    else:
-        return False, address
+    return re.findall(pattern, address.strip())
