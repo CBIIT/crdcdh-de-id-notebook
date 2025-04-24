@@ -81,7 +81,7 @@ class ProcessMedImage:
         # Load the rules from the YAML file
         self.rules = yaml2dict(rule_config_file_path)["rules"]
         self.dicom_tags = self.rules['dicom_tags']
-        self.phi_tags = {tuple(item["tag"]):item["action"].upper() for item in self.dicom_tags if item.get("action", "").upper() in ["X", "Z", "D"]}
+        self.phi_tags = {tuple(item["tag"]):item["action"].upper() for item in self.dicom_tags if item.get("action", "").upper() in ["X", "Z", "D", "U"]}
         # print(self.phi_tags)
         self.sensitive_words = self.rules['keywords']
         # print(self.sensitive_words)
@@ -158,10 +158,25 @@ class ProcessMedImage:
         detected_tags = []
         for item in self.ds.iterall():
             vr = item.VR
-            if item.value in [None, 'None', "", "none"] or vr in ["OW"]: continue 
+            if vr in ["OW"]: continue #skip pixel data
+            #set not_null tag with default value if value is none
             name = item.name
+            value = item.value
+            if name == "Presentation Intent Type":
+                if not value:
+                    item.value = "FOR PRESENTATION"
+                    continue
+            if name == "Image Laterality":
+                if not value:
+                    item.value = "U"
+                    continue
+            if name == "Image Type":
+                if not value:
+                    item.value = ["ORIGINAL", "PRIMARY"]
+                    continue
+            if value in [None, 'None', "", "none"]: continue 
             tuple = (item.tag.group, item.tag.element)
-            redacted_value = self.redact_tag_by_rules(tuple, vr, name, item.value)
+            redacted_value = self.redact_tag_by_rules(tuple, vr, name, value)
             if redacted_value != "None":
                 if not self.quiet:
                     print(f"Tag: {item} - Redacted Value: {redacted_value}") 
@@ -232,7 +247,7 @@ class ProcessMedImage:
     def redact_tag_by_rules(self, tuple, vr, name, value):
         redacted_value = "None"
         # 1) check if the tag is in the dicom_tags
-        if tuple in self.phi_tags:
+        if tuple in self.phi_tags.keys():
             # check if action is remove
             if self.phi_tags[tuple] == 'X':
                 if tuple in self.ds:
@@ -294,18 +309,16 @@ class ProcessMedImage:
                     if split in value:
                         match, val = self.check_phi_in_text(split, value)
                         if match:
-                            return val
+                            return val if name != "Private tag data" else EMPTY_STRING
                 address = match_address(value)
                 if address:
                     return EMPTY_STRING
                 if name == "Text Value":
                     if value in ["DL", "KM", "RS"]:
-                        return EMPTY_STRING
-                    
+                        return EMPTY_STRING      
             elif str(value).isdigit():
                 if match_date(str(value)):
                     return 0
-
         # redact based VR
         if vr == "UI" and name not in self.skip_uid:
             if value in self.dicom_uid_map:
@@ -607,21 +620,41 @@ class ProcessMedImage:
         #         return value
         # elif tag == (0x0008,0x0016): #retain SOP UID
         #     return value
+        # elif tag == (0x0020, 0x000d): #Study Instance UID 
+        #     if self.ds.StudyInstanceUID in self.dicom_uid_map:
+        #         self.studyInstanceUID = self.dicom_uid_map[self.ds.StudyInstanceUID]
+        #         return self.dicom_uid_map[self.ds.StudyInstanceUID]
+        #     else:
+        #         self.studyInstanceUID = pydicom.uid.generate_uid()
+        #         self.dicom_uid_map[self.ds.StudyInstanceUID] = self.studyInstanceUID
+        #         return self.studyInstanceUID
+        # elif tag == (0x0020,0x000E): #Series Instance UID
+        #     if self.ds.SeriesInstanceUID in self.dicom_uid_map:
+        #         self.seriesInstanceUID = self.dicom_uid_map[self.ds.SeriesInstanceUID]
+        #         return self.dicom_uid_map[self.ds.SeriesInstanceUID]
+        #     else:
+        #         self.seriesInstanceUID = pydicom.uid.generate_uid()
+        #         self.dicom_uid_map[self.ds.SeriesInstanceUID] = self.seriesInstanceUID
+        #         return self.seriesInstanceUID 
         elif tag == (0x0020, 0x000d): #Study Instance UID 
-            if self.ds.StudyInstanceUID in self.dicom_uid_map:
-                self.studyInstanceUID = self.dicom_uid_map[self.ds.StudyInstanceUID]
-                return self.dicom_uid_map[self.ds.StudyInstanceUID]
+            if value == self.studyInstanceUID: 
+                return value #already redacted
+            if value in self.dicom_uid_map:
+                self.studyInstanceUID = self.dicom_uid_map[value]
+                return self.studyInstanceUID
             else:
                 self.studyInstanceUID = pydicom.uid.generate_uid()
-                self.dicom_uid_map[self.ds.StudyInstanceUID] = self.studyInstanceUID
+                self.dicom_uid_map[value] = self.studyInstanceUID
                 return self.studyInstanceUID
         elif tag == (0x0020,0x000E): #Series Instance UID
-            if self.ds.SeriesInstanceUID in self.dicom_uid_map:
-                self.seriesInstanceUID = self.dicom_uid_map[self.ds.SeriesInstanceUID]
-                return self.dicom_uid_map[self.ds.SeriesInstanceUID]
+            if value == self.seriesInstanceUID: 
+                return value #already redacted
+            if value in self.dicom_uid_map:
+                self.seriesInstanceUID = self.dicom_uid_map[value]
+                return self.seriesInstanceUID
             else:
                 self.seriesInstanceUID = pydicom.uid.generate_uid()
-                self.dicom_uid_map[self.ds.SeriesInstanceUID] = self.seriesInstanceUID
+                self.dicom_uid_map[value] = self.seriesInstanceUID
                 return self.seriesInstanceUID 
         elif isinstance(value, list):
             for item in value:

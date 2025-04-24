@@ -947,7 +947,7 @@ rules:
     - 0x82
   - name: Institution Name
     # X/Z/D: remove or replace with empty string
-    action: X
+    action: Z
     tag:
     - 0x8
     - 0x80
@@ -1890,12 +1890,12 @@ rules:
     tag:
     - 0x10
     - 0x1100
-  - name: Referenced Patient Sequence
-    # D
-    action: D
-    tag:
-    - 0x8
-    - 0x1120
+  # - name: Referenced Patient Sequence
+  #   # D
+  #   action: D
+  #   tag:
+  #   - 0x8
+  #   - 0x1120
   # - name: Referenced Performed Procedure Step Sequence
   #   # X/Z/D
   #   action: D
@@ -2410,7 +2410,7 @@ rules:
     - 0x55
   - name: Station Name
      #X/Z/D
-    action: X
+    action: Z
     tag:
     - 0x8
     - 0x1010
@@ -2760,7 +2760,6 @@ rules:
   - Verifying Organization
   - Person Name
   - Content Creator's Name
-  - Station Name
   - PET batch_description
   - Service id
   - Physician(s) of Record
@@ -2837,6 +2836,7 @@ rules:
   - Referenced SOP Class UID 
   - SOP Class UID
   - Referenced SOP Instance UID
+  - Coding Scheme UID
 
   regex:
   - \d{2}.\d{2}.\d{4}

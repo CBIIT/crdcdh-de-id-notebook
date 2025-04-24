@@ -293,18 +293,11 @@ def match_name(name):
         return None
     
 def match_phone(phone):
-    pattern = r'\b\d{10}\b'
+    pattern = r'(?:\+1[-\s]?)?(?:\(?\d{3}\)?[-\s]?)?\d{3}[-\s]?\d{4}'
     match = re.match(pattern, phone.strip())
     if match:
         return True, re.sub(pattern, "", phone).strip()
-    else:
-        pattern = r'^\+1-\d{3}-\d{3}-\d{4}$'
-        match = re.match(pattern, phone.strip())
-        if match:
-            return True, re.sub(pattern, "", phone).strip()
-        else:
-            return False, phone
-        
+   
 def match_address(address):
     pattern = r'\b\d+\s+[A-Za-z]+\s+[A-Za-z]+\s+(?:St|Ave|Blvd|Rd|Dr|Ln|Ct|Way|Pl)\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
     return re.findall(pattern, address.strip())
