@@ -1,0 +1,120 @@
+rules:
+  confidence_threshold: 80
+  dicom_tags:
+  - name: Patient's Name
+    tag:
+    - 0x10
+    - 0x10
+  - name: Patient ID
+    tag:
+    - 0x10
+    - 0x20
+  - name: Patient's Insurance Plan
+    tag:
+    - 0x10
+    - 0x1060
+  - name: Patient's Relationship Status
+    tag:
+    - 0x10
+    - 0x1070
+  - name: Other Patient IDs
+    tag:
+    - 0x10
+    - 0x1000
+  - name: Other Patient Names
+    tag:
+    - 0x10
+    - 0x1001
+  - name: Accession Number
+    tag:
+    - 0x8
+    - 0x50
+  - name: Study Comments
+    tag:
+    - 0x32
+    - 0x4000
+  - name: Referring Physician's Name
+    tag:
+    - 0x8
+    - 0x90
+  - name: Operators' Name
+    tag:
+    - 0x8
+    - 0x1070
+  - name: Scheduled Performing Physician's Name
+    tag:
+    - 0x40
+    - 0x6
+  - name: Medical Alerts
+    tag:
+    - 0x10
+    - 0x2000
+  - name: Occupation
+    tag:
+    - 0x10
+    - 0x2180
+  - name: Acquisition Comments
+    tag:
+    - 0x18
+    - 0x4000
+  - name: Admitting Diagnoses Description
+    tag:
+    - 0x8
+    - 0x1080
+  - name: Imaging Service Request Comments
+    tag:
+    - 0x40
+    - 0x2400
+  - name: Scheduled Procedure Step Description
+    tag:
+    - 0x40
+    - 0x7
+  keywords:
+  - Address
+  - Telephone Numbers
+  - Fax Numbers
+  - Suite id
+  - Series from which Prescribed
+  - Series from which prescribed
+  - Slop_int_10...slop_int_17
+  - Clinical Trial Site Name
+  - Clinical Trial Protocol ID
+  - Clinical Trial Protocol Name
+  - Clinical Trial Site ID
+  - Clinical Trial Time Point ID
+  - Clinical Trial Time Point Description
+  - Verifying Observer Name
+  - Verifying Organization
+  - Person Name
+  - Content Creator's Name
+  - Station Name
+  - PET batch_description
+  - Coil ID Data
+  - Physician(s) of Record
+  - Service id
+  - Img is original or unoriginal
+  - Clinical Trial Subject Reading ID
+  - PMTF Information
+  - Histogram tables
+  - Study Description
+  - Series Description
+  - Protocol Name
+  - Study ID
+  - Institution Name
+  - Private tag data
+  - Requested Procedure Description
+  - Performed Station AE Title
+  - Additional Patient History
+  - Clinical Trial Subject ID
+  - Retrieve AE Title
+  - Timezone Offset From UTC
+  regex:
+  - \d{2}.\d{2}.\d{4}
+  - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}
+  - \d{2}/\d{2}/\d{4}
+  - \d{3}[-.\s]?d{7}
+  - \(\d{3}\)[\s]?\d{3}-\d{4}
+  - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'
+  - \d{5}(?:[-\s]\d{4})?
+  - \d{2}-\d{2}-\d{4}
+  - \d{3}-\d{2}-\d{4}
