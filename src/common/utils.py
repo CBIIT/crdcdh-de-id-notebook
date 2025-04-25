@@ -283,7 +283,14 @@ def convert_json_to_csv(json_file, csv_file, cols = ["id_old", "id_new"]):
 def match_date(date_str):
     pattern_8 = r"\b(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\b"  #date in format of yyyymmdd
     pattern_14 = r"\b(19\d{2}|20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])([01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]\b"  #datetime in the format of yyyymmddhhMMss
-    return re.match(pattern_8, date_str.strip()) if len(date_str.strip()) == 8 else re.match(pattern_14, date_str)
+    combined_pattern = f"{pattern_14}|{pattern_8}"
+    pattern = re.compile(combined_pattern)
+    matches = pattern.findall(date_str.strip())
+    if len(matches) > 0:
+        val = re.sub(pattern, "", date_str)
+        return True, val.strip()
+    else:
+        return False, date_str
 
 def match_name(name):
     pattern = r'\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b'
@@ -293,11 +300,25 @@ def match_name(name):
         return None
     
 def match_phone(phone):
-    pattern = r'(?:\+1[-\s]?)?(?:\(?\d{3}\)?[-\s]?)?\d{3}[-\s]?\d{4}'
-    match = re.match(pattern, phone.strip())
-    if match:
-        return True, re.sub(pattern, "", phone).strip()
-   
+    pattern = r'\b1-\d{3}-\d{3}-\d{4}\b'
+    pattern1 = r'(?:\+1[-\s]?)?(?:\(?\d{3}\)?[-\s]?)?\d{3}[-\s]?\d{4}'
+    pattern2 = r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}(?:\s*(?:[xX]|ext)\s*\d+)?\b'
+    combined_pattern = f"{pattern}|{pattern1}|{pattern2}"
+    pattern = re.compile(combined_pattern)
+    matches = pattern.findall(phone.strip())
+    if len(matches) > 0:
+        val = re.sub(pattern, "", phone)
+        return True, val.strip()
+    else:
+        return False, phone
+
 def match_address(address):
     pattern = r'\b\d+\s+[A-Za-z]+\s+[A-Za-z]+\s+(?:St|Ave|Blvd|Rd|Dr|Ln|Ct|Way|Pl)\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
-    return re.findall(pattern, address.strip())
+    pattern2 = r'\b\d+\s+[A-Za-z0-9\s]+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Lane|Ln|Dr|Drive)?\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
+    combined_pattern = f"{pattern}|{pattern2}"
+    pattern = re.compile(combined_pattern)
+    matches = pattern.findall(address.strip())
+    if len(matches) > 0:
+        val = re.sub(pattern, "", address)
+        return True, val.strip()
+    return False, address

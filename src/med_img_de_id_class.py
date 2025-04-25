@@ -150,8 +150,6 @@ class ProcessMedImage:
         """
         if not self.quiet:
             print("De-identifying DICOM metadata")
-        if not self.quiet:
-            print("De-identifying DICOM metadata")
         # Redact PHI in the DICOM dataset
         redacted = 0
         redacted_value = "None"
@@ -224,7 +222,7 @@ class ProcessMedImage:
         # <(0018,1164)>	<Imager Pixel Spacing>
         tag = (0x0018, 0x1164) 
         if not tag in self.ds:
-            self.ds[tag] = pydicom.dataset.DataElement(tag, "DS", "")
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "DS", ["0.143", "0.143"])
         # <(0028,1040)>	<Pixel Intensity Relationship>
         tag = (0x0028, 0x1040)
         if not tag in self.ds:
@@ -233,7 +231,10 @@ class ProcessMedImage:
         tag = (0x0028, 0x1054)
         if not tag in self.ds:
             self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "HU")
-
+        # Burned In Annotation
+        tag = (0x0028,0x0301)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "NO")
         tag = (0x2001,0x0010) #<Private Creator><Philips Imaging DD 001>
         if tag in self.ds:
             tag = (0x2001,0x0013)
@@ -242,8 +243,6 @@ class ProcessMedImage:
             tag = (0x2001,0x0014)
             if not tag in self.ds:
                 self.ds[tag] = pydicom.dataset.DataElement(tag, "LO", "Philips MR Imaging DD 005")
-
-    
     def redact_tag_by_rules(self, tuple, vr, name, value):
         redacted_value = "None"
         # 1) check if the tag is in the dicom_tags
@@ -279,16 +278,20 @@ class ProcessMedImage:
         #     if value == "RL":
         #         return "9"
         # remove tag by name
-        temp = [key for key in self.sensitive_words if key in name]
+        temp = [key for key in self.sensitive_words if key.strip().lower() in name.lower()]
         if temp:
             if isinstance(value, str):
                 return EMPTY_STRING
             else:
                 return None
         # conditional remove
-        temp = [key for key in self.condition_remove if key in name]
+        temp = [key for key in self.condition_remove if key.strip().lower() in name.lower()]
         if temp:
             if isinstance(value, str):
+                if name == "Text Value":
+                    if value in ["DL", "KM", "RS", "CW", "AL", "CH", "CH"]:
+                        return EMPTY_STRING  
+                    else: return "None"
                 if str(value).isdigit():
                     if match_date(str(value)):
                         return "00010101" if len(value) == 8 else "00010101010101"
@@ -299,23 +302,31 @@ class ProcessMedImage:
                 for split in split_list:
                     if split in value:
                         temp_list = value.split(split)
-                        if len(temp_list) >= 2:
+                        if len(temp_list) == 2:
                             if "Admitted to" in temp_list[0]:
                                 return ANONYMIZED
                             else:
-                                return temp_list[0]
-                split_list = [" : ", ":", "_", " "]
+                                match, val = self.check_phi_in_list(split, temp_list)
+                                if match:
+                                    return val if name != "Private tag data" else EMPTY_STRING
+                                else:
+                                    return temp_list[0]
+                        else:
+                            return "None"
+                split_list = [" : ", ":", "_"]
                 for split in split_list:
                     if split in value:
                         match, val = self.check_phi_in_text(split, value)
                         if match:
                             return val if name != "Private tag data" else EMPTY_STRING
-                address = match_address(value)
+                        
+                address, val = match_address(value)
                 if address:
                     return EMPTY_STRING
-                if name == "Text Value":
-                    if value in ["DL", "KM", "RS"]:
-                        return EMPTY_STRING      
+                
+                match, val = self.check_phi_in_text(" ", value)
+                if match:
+                    return val if name != "Private tag data" else EMPTY_STRING 
             elif str(value).isdigit():
                 if match_date(str(value)):
                     return 0
@@ -335,27 +346,33 @@ class ProcessMedImage:
         return redacted_value
 
     def check_phi_in_text(self, split, value):
-        matched = False
+
         temp_list = value.split(split)
+        return self.check_phi_in_list(split, temp_list)
+    
+    def check_phi_in_list(self, split, word_list):
+        matched = False
         rtn_val_list = []
-        for temp in temp_list:
+        for temp in word_list:
             # match name
             name = match_name(temp)
             if name:
                 matched = True
                 continue
-            address = match_address(temp)
+            address, val = match_address(temp)
             if address:
                 matched = True
+                rtn_val_list.append(val)
                 continue
             phone, val = match_phone(temp)
             if phone:
                 matched = True
                 rtn_val_list.append(val)
                 continue
-            date = match_date(temp)
+            date, val = match_date(temp)
             if date:
                 matched = True
+                rtn_val_list.append(val)
                 continue
             rtn_val_list.append(temp)
         return matched, split.join(rtn_val_list)

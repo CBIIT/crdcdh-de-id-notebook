@@ -1908,12 +1908,6 @@ rules:
     tag:
     - 0x400
     - 0x403
-  # - name: Referenced SOP Instance UID
-  #   # U
-  #   action: U
-  #   tag:
-  #   - 0x8
-  #   - 0x1155
   - name: Referenced SOP Instance UID in File
     # U
     action: U
@@ -2795,15 +2789,15 @@ rules:
   - Mobile location number
   - PET file_exists
   - PET where_is_frame
-  - PMTF Information #None
+  - PMTF Information
   - Recon Protocol
   - PET total_delays
   - PET frame_size
   - PET type
   - PET total_prompts
   - Scheduled Procedure Step ID
-  # - Device Serial Number
-  - Slop_int_10...slop_int_17 #None
+  - Device Serial Number
+  - Slop_int_10...slop_int_17
   - Start time(secs) in first axial
   - Image actual date
   - Institution Address
@@ -2835,7 +2829,7 @@ rules:
   skip_uid:
   - Referenced SOP Class UID 
   - SOP Class UID
-  - Referenced SOP Instance UID
+  # - Referenced SOP Instance UID
   - Coding Scheme UID
 
   regex:
