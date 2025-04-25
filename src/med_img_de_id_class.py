@@ -270,18 +270,18 @@ class ProcessMedImage:
         if tuple == (0x0008,0x0068): #Presentation Intent Type
             if not value:
                 return "FOR PRESENTATION"
-        # if name == "[Unknown]":
-        #     if value == "AP":
-        #         return "10"
-        #     if value == "FH":
-        #         return "1"
-        #     if value == "RL":
-        #         return "9"
+        if name == "[Unknown]" and vr == "CS":
+            if value == "AP":
+                return "10"
+            if value == "FH":
+                return "1"
+            if value == "RL":
+                return "9"
         # remove tag by name
         temp = [key for key in self.sensitive_words if key.strip().lower() in name.lower()]
         if temp:
             if isinstance(value, str):
-                return EMPTY_STRING
+                return EMPTY_STRING if not "Device Serial Number" in name else ANONYMIZED
             else:
                 return None
         # conditional remove
@@ -289,14 +289,13 @@ class ProcessMedImage:
         if temp:
             if isinstance(value, str):
                 if name == "Text Value":
-                    if value in ["DL", "KM", "RS", "CW", "AL", "CH", "CH"]:
+                    if value in ["DL", "KM", "RS", "CW", "AL", "CH", "RD"]:
                         return EMPTY_STRING  
-                    else: return "None"
                 if str(value).isdigit():
-                    if match_date(str(value)):
+                    if len(str(value)) in [8, 14] and match_date(str(value)):
                         return "00010101" if len(value) == 8 else "00010101010101"
                     elif match_phone(value):
-                        return EMPTY_STRING
+                        return ANONYMIZED
                 # usd connection word
                 split_list = [" for ", " at ", " on "]
                 for split in split_list:
@@ -306,19 +305,18 @@ class ProcessMedImage:
                             if "Admitted to" in temp_list[0]:
                                 return ANONYMIZED
                             else:
-                                match, val = self.check_phi_in_list(split, temp_list)
-                                if match:
-                                    return val if name != "Private tag data" else EMPTY_STRING
-                                else:
-                                    return temp_list[0]
+                                return temp_list[0] if "Private tag data" not in name else ANONYMIZED
                         else:
-                            return "None"
+                            match, val = self.check_phi_in_list(split, temp_list)
+                            if match:
+                                return ANONYMIZED
+
                 split_list = [" : ", ":", "_"]
                 for split in split_list:
                     if split in value:
                         match, val = self.check_phi_in_text(split, value)
                         if match:
-                            return val if name != "Private tag data" else EMPTY_STRING
+                            return ANONYMIZED
                         
                 address, val = match_address(value)
                 if address:
@@ -326,10 +324,14 @@ class ProcessMedImage:
                 
                 match, val = self.check_phi_in_text(" ", value)
                 if match:
-                    return val if name != "Private tag data" else EMPTY_STRING 
-            elif str(value).isdigit():
-                if match_date(str(value)):
-                    return 0
+                    return ANONYMIZED
+                
+                if value == ["volume underestimated", "motion % white high"]:
+                    return ANONYMIZED
+            elif isinstance(value, int):
+                if len(str(value)) in [8, 14]:
+                    if match_date(str(value)):
+                        return "00010101" if len(str(value)) == 8 else "00010101010101"
         # redact based VR
         if vr == "UI" and name not in self.skip_uid:
             if value in self.dicom_uid_map:

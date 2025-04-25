@@ -293,6 +293,8 @@ def match_date(date_str):
         return False, date_str
 
 def match_name(name):
+    if name.strip() in ["Tx Plan"]:
+        return None 
     pattern = r'\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b'
     if " " in name.strip() and len(name.strip().split(" ")) == 2:
         return re.match(pattern, name.strip())
@@ -320,5 +322,7 @@ def match_address(address):
     matches = pattern.findall(address.strip())
     if len(matches) > 0:
         val = re.sub(pattern, "", address)
+        if val.strip().upper() in ["E", "W", "N", "S"]:
+            val = ""
         return True, val.strip()
     return False, address
