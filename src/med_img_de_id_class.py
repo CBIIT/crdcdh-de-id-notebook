@@ -270,13 +270,6 @@ class ProcessMedImage:
         if tuple == (0x0008,0x0068): #Presentation Intent Type
             if not value:
                 return "FOR PRESENTATION"
-        if name == "[Unknown]" and vr == "CS":
-            if value == "AP":
-                return "10"
-            if value == "FH":
-                return "1"
-            if value == "RL":
-                return "9"
         # remove tag by name
         temp = [key for key in self.sensitive_words if key.strip().lower() in name.lower()]
         if temp:
@@ -294,8 +287,10 @@ class ProcessMedImage:
                 if str(value).isdigit():
                     if len(str(value)) in [8, 14] and match_date(str(value)):
                         return "00010101" if len(value) == 8 else "00010101010101"
-                    elif match_phone(value):
+                    elif len(str(value)) >=10 and match_phone(value):
                         return ANONYMIZED
+                if "Private tag data" in name and value in ["volume underestimated", "motion % white high"]:
+                    return ANONYMIZED
                 # usd connection word
                 split_list = [" for ", " at ", " on "]
                 for split in split_list:
@@ -309,25 +304,19 @@ class ProcessMedImage:
                         else:
                             match, val = self.check_phi_in_list(split, temp_list)
                             if match:
-                                return ANONYMIZED
+                                return val if "Private tag data" not in name else ANONYMIZED
 
-                split_list = [" : ", ":", "_"]
+                split_list = [" : ", ":", "_", " "]
                 for split in split_list:
                     if split in value:
                         match, val = self.check_phi_in_text(split, value)
                         if match:
-                            return ANONYMIZED
+                            return val if "Private tag data" not in name else ANONYMIZED
                         
                 address, val = match_address(value)
                 if address:
                     return EMPTY_STRING
                 
-                match, val = self.check_phi_in_text(" ", value)
-                if match:
-                    return ANONYMIZED
-                
-                if value == ["volume underestimated", "motion % white high"]:
-                    return ANONYMIZED
             elif isinstance(value, int):
                 if len(str(value)) in [8, 14]:
                     if match_date(str(value)):
@@ -366,13 +355,13 @@ class ProcessMedImage:
                 matched = True
                 rtn_val_list.append(val)
                 continue
-            phone, val = match_phone(temp)
-            if phone:
+            date, val = match_date(temp)
+            if date:
                 matched = True
                 rtn_val_list.append(val)
                 continue
-            date, val = match_date(temp)
-            if date:
+            phone, val = match_phone(temp)
+            if phone:
                 matched = True
                 rtn_val_list.append(val)
                 continue
