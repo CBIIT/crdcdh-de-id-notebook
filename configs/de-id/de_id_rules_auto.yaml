@@ -2830,7 +2830,7 @@ rules:
   - Referenced SOP Class UID 
   - SOP Class UID
   # - Referenced SOP Instance UID
-  - Coding Scheme UID
+  # - Coding Scheme UID
 
   regex:
   - \d{2}.\d{2}.\d{4}

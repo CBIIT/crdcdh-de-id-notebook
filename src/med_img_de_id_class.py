@@ -235,7 +235,12 @@ class ProcessMedImage:
         tag = (0x0028,0x0301)
         if not tag in self.ds:
             self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "NO")
-        tag = (0x2001,0x0010) #<Private Creator><Philips Imaging DD 001>
+        # <(0018,5101)>E8	<View Position>
+        tag = (0x0018, 0x5101)
+        if not tag in self.ds:
+            self.ds[tag] = pydicom.dataset.DataElement(tag, "CS", "AP")   
+        #<Private Creator><Philips Imaging DD 001>
+        tag = (0x2001,0x0010) 
         if tag in self.ds:
             tag = (0x2001,0x0013)
             if not tag in self.ds:
@@ -285,12 +290,14 @@ class ProcessMedImage:
                     if value in ["DL", "KM", "RS", "CW", "AL", "CH", "RD"]:
                         return EMPTY_STRING  
                 if str(value).isdigit():
-                    if len(str(value)) in [8, 14] and match_date(str(value)):
-                        return "00010101" if len(value) == 8 else "00010101010101"
-                    elif len(str(value)) >=10 and match_phone(value):
-                        return ANONYMIZED
-                if "Private tag data" in name and value in ["volume underestimated", "motion % white high"]:
-                    return ANONYMIZED
+                    if len(str(value)) in [8, 14]:
+                        match, val = match_date(str(value))
+                        if match:
+                            return "00010101" if len(str(value)) == 8 else "00010101010101"
+                    elif len(str(value)) >=10:
+                        match, val = match_phone(value)
+                        if match:
+                            return ANONYMIZED
                 # usd connection word
                 split_list = [" for ", " at ", " on "]
                 for split in split_list:
@@ -310,6 +317,8 @@ class ProcessMedImage:
                 for split in split_list:
                     if split in value:
                         match, val = self.check_phi_in_text(split, value)
+                        if split == " : ":
+                            val = val.strip(split)
                         if match:
                             return val if "Private tag data" not in name else ANONYMIZED
                         
@@ -317,10 +326,15 @@ class ProcessMedImage:
                 if address:
                     return EMPTY_STRING
                 
+                if name == "Private tag data" and value in ("motion % white high", "volume underestimated", "% green/purple high"):
+                        return ANONYMIZED
+                
             elif isinstance(value, int):
                 if len(str(value)) in [8, 14]:
-                    if match_date(str(value)):
+                    match, val = match_date(str(value))
+                    if match:
                         return "00010101" if len(str(value)) == 8 else "00010101010101"
+
         # redact based VR
         if vr == "UI" and name not in self.skip_uid:
             if value in self.dicom_uid_map:
@@ -353,19 +367,19 @@ class ProcessMedImage:
             address, val = match_address(temp)
             if address:
                 matched = True
-                rtn_val_list.append(val)
+                rtn_val_list.append(val.strip())
                 continue
             date, val = match_date(temp)
             if date:
                 matched = True
-                rtn_val_list.append(val)
+                rtn_val_list.append(val.strip())
                 continue
             phone, val = match_phone(temp)
             if phone:
                 matched = True
-                rtn_val_list.append(val)
+                rtn_val_list.append(val.strip())
                 continue
-            rtn_val_list.append(temp)
+            rtn_val_list.append(temp.strip())
         return matched, split.join(rtn_val_list)
         
     def detect_id_in_tags(self):
