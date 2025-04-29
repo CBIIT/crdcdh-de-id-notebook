@@ -11,33 +11,6 @@ from common.pixel_utils import parse_pixel_data, enhance_image, reverse_windowin
 from common.constants import DICOM_UID_MAP_JSON, EMPTY_STRING, PATIENT_ID_MAP_JSON, PATIENT_SEQUENCES_JSON, ANONYMIZED
 
 ANONYMIZED = "^ANONYMIZED"
-SKIP_EVALUATION_TAGS = [
-    (0x7FE0, 0x0010),  #pixel data, vr = OW
-    ((0x6000, 0x3000)), #overlay pixel data, vr = OW
-    (0x0008, 0x1030), #study description
-    (0x0008, 0x103e), #series description
-    (0x0010, 0x0040), #patient sex
-    (0x0010, 0x1010), #patient age
-    (0x0010, 0x1020), #patient size
-    (0x0010, 0x1030), #patient weight
-    (0x0008, 0x0020), #study date
-    (0x0008, 0x0030), #study time
-    (0x0008, 0x0050), #accession number
-    (0x0008, 0x0060), #modality
-    (0x0008, 0x0064), #conversion type
-    (0x0008, 0x0070), #manufacturer
-    (0x0008, 0x0080), #institution name
-    (0x0008, 0x0090), #referring physician name
-    (0x0008, 0x1010), #station name
-    (0x0008, 0x1030), #study description
-    (0x0008, 0x103e), #series description
-    (0x0010, 0x21b0), #Additional Patient History 
-    (0x0018, 0x1030), #Protocol Name 
-    (0x0018, 0x1000), # Device Serial Number 
-    (0x0020, 0x0010), # Study ID 
-    (0x0032, 0x1060), #Requested Procedure Description 
-    (0x0040, 0x0007), #Scheduled Procedure Step Description  
-]
 class ProcessMedImage:
     def __init__(self, boto3_session, rule_config_file_path, silence_mode = False):
         """
@@ -152,14 +125,14 @@ class ProcessMedImage:
             print("De-identifying DICOM metadata")
         # Redact PHI in the DICOM dataset
         redacted = 0
-        redacted_value = "None"
+        redacted_value = "None" # skip redacting if redacted_value = "None"
         detected_tags = []
         for item in self.ds.iterall():
             vr = item.VR
             if vr in ["OW"]: continue #skip pixel data
-            #set not_null tag with default value if value is none
             name = item.name
             value = item.value
+            #set not_null tag with default value if value is none
             if name == "Presentation Intent Type":
                 if not value:
                     item.value = "FOR PRESENTATION"
@@ -172,7 +145,7 @@ class ProcessMedImage:
                 if not value:
                     item.value = ["ORIGINAL", "PRIMARY"]
                     continue
-            if value in [None, 'None', "", "none"]: continue 
+            if value in [None, 'None', "", "none"]: continue #skip if no need to redacting
             tuple = (item.tag.group, item.tag.element)
             redacted_value = self.redact_tag_by_rules(tuple, vr, name, value)
             if redacted_value != "None":
@@ -248,6 +221,10 @@ class ProcessMedImage:
             tag = (0x2001,0x0014)
             if not tag in self.ds:
                 self.ds[tag] = pydicom.dataset.DataElement(tag, "LO", "Philips MR Imaging DD 005")
+
+    """
+    Redact element value by rules
+    """
     def redact_tag_by_rules(self, tuple, vr, name, value):
         redacted_value = "None"
         # 1) check if the tag is in the dicom_tags
@@ -275,14 +252,14 @@ class ProcessMedImage:
         if tuple == (0x0008,0x0068): #Presentation Intent Type
             if not value:
                 return "FOR PRESENTATION"
-        # remove tag by name
+        # redacting element value by configured keywords in name
         temp = [key for key in self.sensitive_words if key.strip().lower() in name.lower()]
         if temp:
             if isinstance(value, str):
                 return EMPTY_STRING if not "Device Serial Number" in name else ANONYMIZED
             else:
                 return None
-        # conditional remove
+        # conditional redacting element value by configured rules based on patterns in the value
         temp = [key for key in self.condition_remove if key.strip().lower() in name.lower()]
         if temp:
             if isinstance(value, str):
@@ -351,7 +328,6 @@ class ProcessMedImage:
         return redacted_value
 
     def check_phi_in_text(self, split, value):
-
         temp_list = value.split(split)
         return self.check_phi_in_list(split, temp_list)
     
@@ -607,7 +583,9 @@ class ProcessMedImage:
 
     def redact_tag_value(self, value, tag, vr = None):
         if value in [None, 'None', "", "none"]: return value
-        """Function to replace sensitive data with placeholders or anonymous values."""
+        """
+        Function to replace sensitive data with placeholders or anonymous values.
+        """
         action = self.phi_tags[tag]
         if action.upper() in ["X", "Z"]:
             if isinstance(value, str):
@@ -633,31 +611,6 @@ class ProcessMedImage:
             return 'Mr.^Observer'
         elif tag == (0x0070, 0x0084): # content creator's name
             return 'Content^Creator'
-        # elif tag == (0x0008, 0x103e):  # Series Description
-        #     return 'Series^Description'
-        # elif tag in [(0x0040, 0x0007), (0x0032, 0x1060)]:
-        #     if "Dr." in value:
-        #         return ANONYMIZED
-        #     else:
-        #         return value
-        # elif tag == (0x0008,0x0016): #retain SOP UID
-        #     return value
-        # elif tag == (0x0020, 0x000d): #Study Instance UID 
-        #     if self.ds.StudyInstanceUID in self.dicom_uid_map:
-        #         self.studyInstanceUID = self.dicom_uid_map[self.ds.StudyInstanceUID]
-        #         return self.dicom_uid_map[self.ds.StudyInstanceUID]
-        #     else:
-        #         self.studyInstanceUID = pydicom.uid.generate_uid()
-        #         self.dicom_uid_map[self.ds.StudyInstanceUID] = self.studyInstanceUID
-        #         return self.studyInstanceUID
-        # elif tag == (0x0020,0x000E): #Series Instance UID
-        #     if self.ds.SeriesInstanceUID in self.dicom_uid_map:
-        #         self.seriesInstanceUID = self.dicom_uid_map[self.ds.SeriesInstanceUID]
-        #         return self.dicom_uid_map[self.ds.SeriesInstanceUID]
-        #     else:
-        #         self.seriesInstanceUID = pydicom.uid.generate_uid()
-        #         self.dicom_uid_map[self.ds.SeriesInstanceUID] = self.seriesInstanceUID
-        #         return self.seriesInstanceUID 
         elif tag == (0x0020, 0x000d): #Study Instance UID 
             if value == self.studyInstanceUID: 
                 return value #already redacted

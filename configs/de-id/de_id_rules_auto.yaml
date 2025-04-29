@@ -311,12 +311,6 @@ rules:
     tag:
     - 0x8
     - 0x23
-  # - name: Content Sequence
-  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
-  #   action: D
-  #   tag:
-  #   - 0x40
-  #   - 0xA730
   - name: Contribution DateTime
     # X: remove
     action: D
@@ -867,12 +861,6 @@ rules:
     tag:
     - 0x40
     - 0x4036
-  # - name: Icon Image Sequence
-  #   # D: remove
-  #   action: D
-  #   tag:
-  #   - 0x88
-  #   - 0x200
   - name: Identifying Comments
     # X: remove
     action: X
@@ -1515,12 +1503,6 @@ rules:
     tag:
     - 0x10
     - 0x2154
-  # - name: Patient Comments
-  #   # Z
-  #   action: X
-  #   tag:
-  #   - 0x10
-  #   - 0x4000
   - name: Patient ID
     # Z/D
     action: D
@@ -1866,12 +1848,6 @@ rules:
     tag:
     - 0x40
     - 0x4023
-  # - name: Referenced Image Sequence
-  #   # X/Z/U
-  #   action: D
-  #   tag:
-  #   - 0x8
-  #   - 0x1140
   - name: Referenced Observation UID (Trial)
     # U
     action: U
@@ -1890,18 +1866,6 @@ rules:
     tag:
     - 0x10
     - 0x1100
-  # - name: Referenced Patient Sequence
-  #   # D
-  #   action: D
-  #   tag:
-  #   - 0x8
-  #   - 0x1120
-  # - name: Referenced Performed Procedure Step Sequence
-  #   # X/Z/D
-  #   action: D
-  #   tag:
-  #   - 0x8
-  #   - 0x1111
   - name: Referenced SOP Instance MAC Sequence
     # X
     action: X
@@ -1914,12 +1878,6 @@ rules:
     tag:
     - 0x4
     - 0x1511
-  # - name: Referenced Study Sequence
-  #   # X/Z
-  #   action: D
-  #   tag:
-  #   - 0x8
-  #   - 0x1110
   - name: Referenced Treatment Position Group UID
     # U
     action: U
@@ -1962,12 +1920,6 @@ rules:
     tag:
     - 0x3006
     - 0xC2
-  # - name: Request Attributes Sequence
-  #   # D
-  #   action: D
-  #   tag:
-  #   - 0x40
-  #   - 0x275
   - name: Requested Procedure ID
     # X
     action: Z
@@ -2325,12 +2277,6 @@ rules:
     tag:
     - 0x34
     - 0x5
-  # - name: Source Image Sequence
-  #   #X/Z/U
-  #   action: D
-  #   tag:
-  #   - 0x8
-  #   - 0x2112
   - name: Source Manufacturer
     #X
     action: X
@@ -2801,13 +2747,6 @@ rules:
   - Start time(secs) in first axial
   - Image actual date
   - Institution Address
-  # - Protocol Name
-  # - Requested Procedure Description
-  # - Series Description
-  # - Study Description
-  # - Text Value
-  # - Private tag data
-  # - Private Creator
  
   condition_remove:
   - Requested Procedure Description
@@ -2819,7 +2758,6 @@ rules:
   - Series Number
   - Image Comments
   - Protocol Name
-  # - Device Serial Number
   - Additional Patient History
   - Comments on Radiation Dose
   - Requested Procedure Comments
@@ -2829,8 +2767,6 @@ rules:
   skip_uid:
   - Referenced SOP Class UID 
   - SOP Class UID
-  # - Referenced SOP Instance UID
-  # - Coding Scheme UID
 
   regex:
   - \d{2}.\d{2}.\d{4}

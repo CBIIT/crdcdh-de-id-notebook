@@ -281,6 +281,9 @@ def convert_json_to_csv(json_file, csv_file, cols = ["id_old", "id_new"]):
             writer.writerow([key, value])
 
 def match_date(date_str):
+    """
+    match date string with regex
+    """
     if len(date_str.strip().split(" ")[-1]) not in [8, 14]:
         return False, date_str
     pattern_8 = r"\b(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\b"  #date in format of yyyymmdd
@@ -295,6 +298,9 @@ def match_date(date_str):
         return False, date_str
 
 def match_name(name):
+    """
+    match name string with regex
+    """
     if name.strip() in ["Tx Plan"]:
         return None 
     pattern = r'\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b'
@@ -304,6 +310,9 @@ def match_name(name):
         return None
     
 def match_phone(phone):
+    """
+    match phone string with regex
+    """
     if len(phone.strip()) < 10 or len(phone.strip().split(" ")[-1]) < 10 :
         return False, phone
     pattern = r'\b1-\d{3}-\d{3}-\d{4}\b'
@@ -319,6 +328,9 @@ def match_phone(phone):
         return False, phone
 
 def match_address(address):
+    """
+    match address string with regex
+    """
     pattern = r'\b\d+\s+[A-Za-z]+\s+[A-Za-z]+\s+(?:St|Ave|Blvd|Rd|Dr|Ln|Ct|Way|Pl)\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
     pattern2 = r'\b\d+\s+[A-Za-z0-9\s]+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Lane|Ln|Dr|Drive)?\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
     combined_pattern = f"{pattern2}|{pattern}"
