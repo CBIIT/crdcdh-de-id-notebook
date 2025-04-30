@@ -1,5 +1,5 @@
 rules:
-  confidence_threshold: 80
+  confidence_threshold: 5
   dicom_tags:
   - name: Accession Number 
     # Z: replace with empty string or None
@@ -13,30 +13,62 @@ rules:
     tag:
     - 0x8
     - 0x2A
+  # - name: Acquisition Device Processing Description
+  #   # X/D: remove or set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   action: keep
+  #   tag:
+  #   - 0x18
+  #   - 0x1004
+  # - name: Acquisition Field Of View Label
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   action: D
+  #   tag:
+  #   - 0x18
+  #   - 0x11BB
+  # - name: Acquisition Protocol Description 
+  #   # Z
+  #   tag:
+  #   - 0x18
+  #   - 0x9424
   - name: Acquisition Date
     # X/Z: remove
     action: D
     tag:
     - 0x8
     - 0x22
+  # - name: Acquisition Time
+  #   # X/Z: remove or set to empty string
+  #   tag:
+  #   - 0x8
+  #   - 0x32
   - name: Acquisition UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
     tag:
     - 0x8
     - 0x17
-  # - name: Acquisition Context Sequence
-  #   # X/Z: remove or set to empty string
-  #   action: D
+  # - name: Acquisition Comments 
+  #   # X: remove set to empty string keep
   #   tag:
-  #   - 0x40
-  #   - 0x555
+  #   - 0x18
+  #   - 0x4000
+  - name: Acquisition Context Sequence
+    # X/Z: remove or set to empty string
+    action: D
+    tag:
+    - 0x40
+    - 0x555
   - name: Actual Human Performers Sequence
     # X: remove
     action: X
     tag:
     - 0x40
     - 0x4035
+  # - name: Additional Patient History
+  #   # X: remove
+  #   tag:
+  #   - 0x10
+  #   - 0x21B0
   - name: Address (Trial)
     # X: remove
     action: X
@@ -61,6 +93,16 @@ rules:
     tag:
     - 0x8
     - 0x1084
+  # - name: Admitting Diagnoses Description
+  #   # X: remove  keep
+  #   tag:
+  #   - 0x8
+  #   - 0x1080
+  # - name: Admitting Time 
+  #   # X: remove
+  #   tag:
+  #   - 0x38
+  #   - 0x21
   - name: Affected SOP Instance UID
     # X: remove
     action: X
@@ -78,6 +120,16 @@ rules:
     tag:
     - 0x40
     - 0xB034
+  # - name: Annotation Group Description
+  #   # X: remove
+  #   tag:
+  #   - 0x6A
+  #   - 0x6
+  # - name: Annotation Group Label
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag:
+  #   - 0x6A
+  #   - 0x5
   - name: Annotation Group UID
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: U
@@ -126,12 +178,22 @@ rules:
     tag:
     - 0x2200
     - 0x5
+  # - name: Beam Descriptions
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0xC3
   - name: Beam Hold Transition DateTime
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
     tag:
     - 0x300C
     - 0x127
+  # - name: Bolus Description
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0xDD
   - name: Branch of Service
     # X: remove
     action: X
@@ -149,6 +211,11 @@ rules:
     tag:
     - 0x18
     - 0x1203
+  # - name: Calibration Time
+  #   # X: remove keep
+  #   tag:
+  #   - 0x14
+  #   - 0x407C
   - name: Camera Owner Name
     # X: remove
     action: X
@@ -175,7 +242,7 @@ rules:
     - 0x310
   - name: Clinical Trial Coordinating Center Name
     # Z: replace with empty string
-    action: Z
+    action: X
     tag:
     - 0x12
     - 0x60
@@ -193,7 +260,6 @@ rules:
     - 0x81
   - name: Clinical Trial Protocol ID
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
-    action: Z
     tag:
     - 0x12
     - 0x20
@@ -203,6 +269,11 @@ rules:
     tag:
     - 0x12
     - 0x21
+  # - name: Clinical Trial Series Description
+  #   # X: remove keep
+  #   tag:
+  #   - 0x12
+  #   - 0x72
   - name: Clinical Trial Series ID
     # X: remove
     action: X
@@ -210,17 +281,28 @@ rules:
     - 0x12
     - 0x71
   - name: Clinical Trial Site ID
+    # Z: remove
+    action: X
+    tag:
+    - 0x12
+    - 0x30
+  - name: Clinical Trial Site ID
     # Z: replace with empty string
-    action: Z
     tag:
     - 0x12
     - 0x30
   - name: Clinical Trial Site Name
     # Z: replace with empty string
-    action: Z
+    action: X
     tag:
     - 0x12
     - 0x31
+  - name: Clinical Trial Sponsor Name
+    # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+    action: D
+    tag:
+    - 0x12
+    - 0x10
   - name: Clinical Trial Subject ID
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
@@ -229,28 +311,54 @@ rules:
     - 0x40
   - name: Clinical Trial Subject Reading ID
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
-    action: Z
+    action: X
     tag:
     - 0x12
     - 0x42
+  # - name: Clinical Trial Time Point Description
+  #   # X: remove keep
+  #   tag:
+  #   - 0x12
+  #   - 0x51
   - name: Clinical Trial Time Point ID
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: Z
     tag:
     - 0x12
     - 0x50
-  - name: Clinical Trial Time Point Description
-    # Z: replace with empty string
-    action: Z
+  - name: Comments on Radiation Dose
+    # X: remove
+    action: X
     tag:
-    - 0x12
-    - 0x51
+    - 0x40
+    - 0x310
+  - name: Comments on the Performed Procedure Step
+    # X: remove
+    action: X
+    tag:
+    - 0x40
+    - 0x280
+  # - name: Compensator Description
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0x2EB
   - name: Concatenation UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
     tag:
     - 0x20
     - 0x9161
+  # - name: Conceptual Volume Combination Description
+  #   # Z: replace with empty string
+  #   tag:
+  #   - 0x3010
+  #   - 0xF
+  # - name: Conceptual Volume Description
+  #   # Z: replace with empty string
+  #   tag:
+  #   - 0x3010
+  #   - 0x17
   - name: Conceptual Volume UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
@@ -287,6 +395,11 @@ rules:
     tag:
     - 0x50
     - 0x1B
+  # - name: Container Description
+  #   # X: remove
+  #   tag:
+  #   - 0x40
+  #   - 0x51A
   - name: Container Identifier
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
@@ -311,12 +424,53 @@ rules:
     tag:
     - 0x8
     - 0x23
+  - name: Content Sequence
+    # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+    action: D
+    tag:
+    - 0x40
+    - 0xA730
+  # - name: Content Time
+  #   # Z/D: replace with empty string or set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag:
+  #   - 0x8
+  #   - 0x33
+  # - name: Context Group Local Version
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR keep
+  #   tag:
+  #   - 0x8
+  #   - 0x107
+  # - name: Context Group Version
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR, keep
+  #   tag:
+  #   - 0x8
+  #   - 0x106
+  # - name: Contrast/Bolus Agent
+  #   # Z?D: replace with empty string or set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag: keep
+  #   - 0x18
+  #   - 0x10
+  # - name: Contrast/Bolus Start Time
+  #   # X: remove keep
+  #   tag:
+  #   - 0x18
+  #   - 0x1042
+  # - name: Contrast/Bolus Stop Time
+  #   # X: remove keep
+  #   tag:
+  #   - 0x18
+  #   - 0x1043
   - name: Contribution DateTime
     # X: remove
     action: D
     tag:
     - 0x18
     - 0xA002
+  # - name: Contribution Description
+  #   # X: remove
+  #   tag:
+  #   - 0x18
+  #   - 0xA003
   - name: Country of Residence
     # X: remove
     action: X
@@ -329,6 +483,11 @@ rules:
     tag:
     - 0x2100
     - 0x40
+  # - name: Creation Time
+  #   # X: remove
+  #   tag:
+  #   - 0x2100
+  #   - 0x50
   - name: Current Observer (Trial)
     # X: remove
     action: X
@@ -347,6 +506,11 @@ rules:
     tag:
     - 0x8
     - 0x25
+  # - name: Curve Time
+  #   # X: remove
+  #   tag:
+  #   - 0x8
+  #   - 0x35
   - name: Custodial Organization Sequence
     # X: remove
     action: X
@@ -419,6 +583,17 @@ rules:
     tag:
     - 0x18
     - 0x9701
+  # - name: Decomposition Description
+  #   # X: remove keep
+  #   tag:
+  #   - 0x0018
+  #   - 0x937F
+  - name: Derivation Description
+    # X: remove
+    action: X
+    tag:
+    - 0x8
+    - 0x2111
   - name: Destination AE
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
@@ -449,6 +624,12 @@ rules:
     tag:
     - 0x3010
     - 0x2D
+  - name: Device Serial Number
+    # XZ/D: remove or set to a non-zero length value that may be a dummy value and consistent with the VR
+    action: X
+    tag:
+    - 0x18
+    - 0x1000
   # - name: Device Setting Description
   #   # X: remove keep
   #   tag:
@@ -490,6 +671,21 @@ rules:
     tag:
     - 0x38
     - 0x30
+  # - name: Discharge Diagnosis Description
+  #   # X: remove
+  #   tag:
+  #   - 0x38
+  #   - 0x40
+  # - name: Discharge Time
+  #   # X: remove
+  #   tag:
+  #   - 0x38
+  #   - 0x32
+  # - name: Displacement Reference Label
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0x79A
   - name: Distribution Address
     # X: remove
     action: X
@@ -502,6 +698,11 @@ rules:
     tag:
     - 0x4008
     - 0x119
+  # - name: Dose Reference Description
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0x0016
   - name: Dose Reference UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     tag:
@@ -530,6 +731,36 @@ rules:
     tag:
     - 0x18
     - 0x9517
+  - name: End Acquisition Date
+    # X/D: replace with empty string or set to a non-zero length value that may be a dummy value and consistent with the VR
+    tag:
+    - 0x18
+    - 0x9517
+  # - name: Entity Description
+  #   # X: remove
+  #   tag:
+  #   - 0x3010
+  #   - 0x37
+  # - name: Entity Label
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag:
+  #   - 0x3010
+  #   - 0x35
+  # - name: Entity Long Label
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag:
+  #   - 0x3010
+  #   - 0x38
+  # - name: Entity Name
+  #   # X: remove
+  #   tag:
+  #   - 0x3010
+  #   - 0x36
+  # - name: Equipment Frame of Reference Description
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0x3676
   - name: Ethics Committee Approval Effectiveness End Date
     action: D
     tag:
@@ -540,6 +771,11 @@ rules:
     tag:
     - 0x12
     - 0x86
+  # - name: Ethnic Group
+  #   # X: remove  keep
+  #   tag:
+  #   - 0x10
+  #   - 0x2160
   - name: Ethnic Group Code Sequence
     # X: remove
     tag:
@@ -575,6 +811,11 @@ rules:
     tag:
     - 0x40
     - 0x2017
+  # - name: Filter Lookup Table Description
+  #   # X: remove
+  #   tag:
+  #   - 0x3A
+  #   - 0x32B
   - name: Findings Group Recording Date (Trial)
     # D
     action: D
@@ -593,6 +834,11 @@ rules:
     tag:
     - 0x3008
     - 0x54
+  # - name: Fixation Device Description
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0x196
   - name: Flow Identifier
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
@@ -611,6 +857,11 @@ rules:
     tag:
     - 0x3010
     - 0x007F
+  # - name: Fraction Group Description
+  #   # X: remove
+  #   tag:
+  #   - 0x300A
+  #   - 0x72
   - name: Frame Acquisition DateTime
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
@@ -641,6 +892,11 @@ rules:
     tag:
     - 0x18
     - 0x9151
+  # - name: Functional Sync Pulse
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag:
+  #   - 0x18
+  #   - 0x9623
   - name: Gantry ID
     # X: remove
     action: X
@@ -844,11 +1100,21 @@ rules:
     tag:
     - 0x70
     - 0x1
+  # - name: Hanging Protocol Creation DateTime
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag:
+  #   - 0x72
+  #   - 0xA
   - name: Histological Diagnoses Code Sequence
     # X: remove
     tag:
     - 0x8
     - 0x1304
+  # - name: HL7 Document Effective Time
+  #   # X: remove
+  #   tag:
+  #   - 0x40
+  #   - 0xE004
   - name: Human Performer's Name
     # X: remove
     action: X
@@ -861,11 +1127,23 @@ rules:
     tag:
     - 0x40
     - 0x4036
+  - name: Icon Image Sequence
+    # X: remove
+    action: X
+    tag:
+    - 0x88
+    - 0x200
   - name: Identifying Comments
     # X: remove
     action: X
     tag:
     - 0x8
+    - 0x4000
+  - name: Image Comments
+    # X: remove
+    action: X
+    tag:
+    - 0x20
     - 0x4000
   - name: Image Presentation Comments
     # X: remove
@@ -873,12 +1151,22 @@ rules:
     tag:
     - 0x28
     - 0x4000
+  # - name: Imaging Service Request Comments
+  #   # X: remove
+  #   tag:
+  #   - 0x40
+  #   - 0x2400
   - name: Impedance Measurement DateTime
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
     tag:
     - 0x3A
     - 0x314
+  # - name: Impressions
+  #   # X: remove
+  #   tag:
+  #   - 0x4008
+  #   - 0x300
   - name: information Issue DateTime
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
@@ -897,6 +1185,11 @@ rules:
     tag:
     - 0x8
     - 0x12
+  # - name: Instance Creation Time
+  #   # X/Z/D: keep()
+  #   tag:
+  #   - 0x8
+  #   - 0x13
   - name: Instance Creator UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
@@ -911,7 +1204,7 @@ rules:
     - 0x600
   - name: Institution Address
     # X
-    action: Z
+    action: X
     tag:
     - 0x8
     - 0x81
@@ -935,7 +1228,7 @@ rules:
     - 0x82
   - name: Institution Name
     # X/Z/D: remove or replace with empty string
-    action: Z
+    action: X
     tag:
     - 0x8
     - 0x80
@@ -951,6 +1244,11 @@ rules:
     tag:
     - 0x10
     - 0x1050
+  # - name: Intended Fraction Start Time
+  #   # X: remove
+  #   tag:
+  #   - 0x3010
+  #   - 0x85
   - name: Intended Phase End Date
     # X/D: replace with empty string or set to a non-zero length value that may be a dummy value and consistent with the VR
     action: D
@@ -975,6 +1273,11 @@ rules:
     tag:
     - 0x300A
     - 0x0741
+  # - name: Interlock Description
+  #   # D: set to a non-zero length value that may be a dummy value and consistent with the VR
+  #   tag:
+  #   - 0x300A
+  #   - 0x0783
   - name: Interpretation Approver Sequence
     # X: remove
     action: X
@@ -995,7 +1298,6 @@ rules:
     - 0x113
   - name: Interpretation Approval Sequence
     # X: remove
-    action: X
     tag:
     - 0x4008
     - 0x111
@@ -1005,6 +1307,11 @@ rules:
     tag:
     - 0x4008
     - 0x10C
+  # - name: Interpretation Diagnosis Description
+  #   # X: remove
+  #   tag:
+  #   - 0x4008
+  #   - 0x115
   - name: Interpretation ID
     # X: remove
     action: X
@@ -1059,6 +1366,16 @@ rules:
     tag:
     - 0x4008
     - 0x109
+  # - name: Intervention Drug Start Time
+  #   # X: remove keep
+  #   tag:
+  #   - 0x18
+  #   - 0x35
+  # - name: Intervention Drug Stop Time
+  #   # X: remove  keep
+  #   tag:
+  #   - 0x18
+  #   - 0x27
   - name: Irradiation Event UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
@@ -1085,25 +1402,22 @@ rules:
     - 0x14
   - name: Issuer of Clinical Trial Protocol ID
     # X: remove
-    action: Z
+    action: D
     tag:
     - 0x12
     - 0x22
   - name: Issuer of Clinical Trial Series ID
     # X: remove
-    action: Z
     tag:
     - 0x12
     - 0x73
   - name: Issuer of Clinical Trial Site ID
     # X: remove
-    action: Z
     tag:
     - 0x12
     - 0x32
   - name: Issuer of Clinical Trial Subject Reading ID
     # X: remove
-    action: Z
     tag:
     - 0x12
     - 0x43
@@ -1131,16 +1445,26 @@ rules:
     - 0x64
   - name: Issuer of the Container Identifier Sequence
     # Z: replace with empty string
-    action: D
+    action: Z
     tag:
     - 0x40
     - 0x513
   - name: Issuer of the Specimen Identifier Sequence
     # Z: replace with empty string
-    action: D
+    action: Z
     tag:
     - 0x40
     - 0x562
+  # - name: Issue Time of Imaging Service Request
+  #   # X: remove
+  #   tag:
+  #   - 0x40
+  #   - 0x2005
+  # - name: Label Text
+  #   # X: remove
+  #   tag:
+  #   - 0x2200
+  #   - 0x2
   - name: Large Palette Color Lookup Table UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
@@ -1177,12 +1501,22 @@ rules:
     tag:
     - 0x16
     - 0x4E
+  # - name: Long Device Description
+  #   # X: remove
+  #   tag:
+  #   - 0x50
+  #   - 0x21
   - name: MAC
     # X: remove
     action: X
     tag:
     - 0x400
     - 0x404
+  # - name: Maker Note
+  #   # X: remove keep
+  #   tag:
+  #   - 0x16
+  #   - 0x2B
   - name: Manufacturer's Device Class UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
@@ -1201,6 +1535,11 @@ rules:
     tag:
     - 0x2
     - 0x3
+  # - name: Medical Alerts
+  #   # X: remove keep
+  #   tag:
+  #   - 0x10
+  #   - 0x2000
   - name: Medical Record Locator
     # X: remove
     action: X
@@ -1231,6 +1570,11 @@ rules:
     tag:
     - 0x20
     - 0x3406
+  # - name: Modified Image Time
+  #   # X: remove
+  #   tag:
+  #   - 0x20
+  #   - 0x3405
   - name: Modifying Device ID
     # X: remove
     action: X
@@ -1259,6 +1603,11 @@ rules:
     tag:
     - 0x3008
     - 0x56
+  # - name: Multi-energy Acquisition Description
+  #   # X: remove keep
+  #   tag:
+  #   - 0x18
+  #   - 0x937B
   - name: Multiplex Group UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
     action: U
@@ -1319,12 +1668,22 @@ rules:
     tag:
     - 0x40
     - 0xA402
+  # - name: Observation Time (Trial)
+  #   # X: remove
+  #   tag:
+  #   - 0x40
+  #   - 0xA193
   - name: Observation UID
     # U: replace with a non-zero length UID that is internally consistent within a set of Instances
-    action: U
     tag:
     - 0x40
     - 0xA4171
+  - name: Occupation
+    # X: remove
+    action: X
+    tag:
+    - 0x10
+    - 0x2180
   - name: Operator Identification Sequence
     # X: remove
     action: X
@@ -1375,7 +1734,6 @@ rules:
     - 0x70
   - name: Other Clinical Trial Protocol IDs Sequence
     # X: remove
-    action: X
     tag:
     - 0x12
     - 0x23
@@ -1408,6 +1766,11 @@ rules:
     tag:
     - 0x8
     - 0x24
+  # - name: Overlay Time
+  #   # X: remove
+  #   tag:
+  #   - 0x8
+  #   - 0x34
   - name: Override DateTime
     # D:
     action: D
@@ -1426,6 +1789,11 @@ rules:
     tag:
     - 0x10
     - 0x1040
+  # - name: Patient Age
+  #   # X: remove keep
+  #   tag:
+  #   - 0x10
+  #   - 0x1010
   - name: Patient's Birth Date
     # Z
     action: Z
@@ -1464,7 +1832,7 @@ rules:
     - 0x1060
   - name: Patient Name
     # Z
-    action: D
+    action: Z
     tag:
     - 0x10
     - 0x10
@@ -1491,6 +1859,22 @@ rules:
     tag:
     - 0x10
     - 0x21F0
+  # - name: Patient's Sex
+  #   # Z keep
+  #   tag:
+  #   - 0x10
+  #   - 0x40
+  # - name: Patient's Sex Neutered
+  #   # x/Z
+  #   action: keep
+  #   tag:
+  #   - 0x10
+  #   - 0x2203
+  # - name: Patient's Size
+  #   # x keep
+  #   tag:
+  #   - 0x10
+  #   - 0x1020
   - name: Patient's Telecom Information
     # X
     action: X
@@ -1503,12 +1887,28 @@ rules:
     tag:
     - 0x10
     - 0x2154
+  # - name: Patient's Weight
+  #   # X keep
+  #   tag:
+  #   - 0x10
+  #   - 0x4000
+  - name: Patient Comments
+    # Z
+    action: X
+    tag:
+    - 0x10
+    - 0x4000
   - name: Patient ID
     # Z/D
-    action: D
+    action: Z
     tag:
     - 0x10
     - 0x20
+  # - name: Patient Setup Photo Description
+  #   # X
+  #   tag:
+  #   - 0x300A
+  #   - 0x0794
   - name: Patient Setup UID
     # U
     action: U
@@ -1527,6 +1927,16 @@ rules:
     tag:
     - 0x40
     - 0x1004
+  # - name: Patient Treatment Preparation Method Description
+  #   # X
+  #   tag:
+  #   - 0x300A
+  #   - 0x792
+  # - name: Patient Treatment Preparation Procedure Parameter Description
+  #   # X
+  #   tag:
+  #   - 0x300A
+  #   - 0x78E
   - name: Participant Sequence
     # X
     action: X
@@ -1545,6 +1955,11 @@ rules:
     tag:
     - 0x40
     - 0x243
+  # - name: Performed Procedure Step Description
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0x054
   - name: Performed Procedure Step End Date
     # X
     action: D
@@ -1557,6 +1972,11 @@ rules:
     tag:
     - 0x40
     - 0x4051
+  # - name: Performed Procedure Step End Time
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0x0251
   - name: Performed Procedure Step ID
     # X
     action: X
@@ -1575,6 +1995,11 @@ rules:
     tag:
     - 0x40
     - 0x4050
+  # - name: Performed Procedure Step Start Time
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0x0245
   - name: Performed Station AE Title
     # X
     action: X
@@ -1637,7 +2062,7 @@ rules:
     - 0x1101
   - name: Person Name
     # D: set to a non-zero length value that may be a dummy value and consistent with the VR
-    action: Z
+    action: D
     tag:
     - 0x40
     - 0xA123
@@ -1689,6 +2114,21 @@ rules:
     tag:
     - 0x3002
     - 0x121
+  # - name: Pregnancy Status
+  #   # X keep
+  #   tag:
+  #   - 0x10
+  #   - 0x21C0
+  # - name: Pre-Medication
+  #   # X
+  #   tag:
+  #   - 0x140
+  #   - 0x12
+  # - name: Prescription Description
+  #   # X
+  #   tag:
+  #   - 0x300A
+  #   - 0xE
   - name: Prescription Notes
     # Z
     action: X
@@ -1707,6 +2147,11 @@ rules:
     tag:
     - 0x70
     - 0x82
+  # - name: Presentation Creation Time
+  #   # Z
+  #   tag:
+  #   - 0x70
+  #   - 0x82
   - name: Presentation Display Collection UID
     # U
     action: U
@@ -1729,6 +2174,11 @@ rules:
     tag:
     - 0x8
     - 0x1301
+  # - name: Prior Treatment Dose Description
+  #   # X
+  #   tag:
+  #   - 0x3010
+  #   - 0x0061
   - name: Procedure Step Cancellation DateTime
     # X
     action: D
@@ -1741,12 +2191,48 @@ rules:
     tag:
     - 0x44
     - 0xB
+  # - name: Protocol Name
+  #   # X/D keep
+  #   tag:
+  #   - 0x18
+  #   - 0x1030
+  # - name: Pyramid Description
+  #   # X
+  #   action keep
+  #   tag:
+  #   - 0x8
+  #   - 0x1088
+  # - name: Pyramid Label
+  #   # X
+  #   tag:
+  #   - 0x20
+  #   - 0x27
   - name: Pyramid UID
     # U
     action: U
     tag:
     - 0x8
     - 0x19
+  # - name: Radiation Dose Identification Label
+  #   # D
+  #   tag:
+  #   - 0x300A
+  #   - 0x0619
+  # - name: Radiation Dose In-Vivo Measurement Label
+  #   # D
+  #   tag:
+  #   - 0x300A
+  #   - 0x0623
+  # - name: Radiation Generation Mode Description
+  #   # Z
+  #   tag:
+  #   - 0x300A
+  #   - 0x067D
+  # - name: Radiation Generation Mode Label
+  #   # D
+  #   tag:
+  #   - 0x300A
+  #   - 0x067C
   - name: Radiopharmaceutical Start DateTime
     # X
     action: D
@@ -1759,12 +2245,49 @@ rules:
     tag:
     - 0x18
     - 0x1079
+  # - name: Radiopharmaceutical Start Time
+  #   # X keep
+  #   tag:
+  #   - 0x18
+  #   - 0x1072
+  # - name: Reason for Omission Description
+  #   # X
+  #   tag:
+  #   - 0x300C
+  #   - 0x113
   - name: Reason for Requested Procedure Code Sequence
     # X
     action: X
     tag:
     - 0x0040
     - 0x100A
+  # - name: Reason for Study
+  #   # X
+  #   tag:
+  #   - 0x0032
+  #   - 0x1030
+  # - name: Reason for Superseding
+  #   # Z
+  #   tag:
+  #   - 0x3010
+  #   - 0x005C
+  # - name: Reason for the Attribute Modification
+  #   # D
+  #   tag:
+  #   - 0x400
+  #   - 0x565
+  - name: Reason for the Imaging Service Request
+    # X
+    action: X
+    tag:
+    - 0x40
+    - 0x2001
+  - name: Reason for the Requested Procedure
+    # X
+    action: X
+    tag:
+    - 0x40
+    - 0x1002
   - name: Reason for Visit
     # X
     action: X
@@ -1825,17 +2348,6 @@ rules:
     tag:
     - 0x3010
     - 0x31
-  - name: Referenced File ID
-    action: Z
-    tag:
-    - 0x4
-    - 0x1500
-  - name: Referenced General Purpose Scheduled Procedure Step Transaction UID
-    # U
-    action: U
-    tag:
-    - 0x40
-    - 0x4022
   - name: Referenced Frame of Reference UID
     # U
     action: U
@@ -1848,6 +2360,12 @@ rules:
     tag:
     - 0x40
     - 0x4023
+  - name: Referenced Image Sequence
+    # X/Z/U
+    action: Z
+    tag:
+    - 0x8
+    - 0x1140
   - name: Referenced Observation UID (Trial)
     # U
     action: U
@@ -1866,18 +2384,42 @@ rules:
     tag:
     - 0x10
     - 0x1100
+  - name: Referenced Patient Sequence
+    # X
+    action: X
+    tag:
+    - 0x8
+    - 0x1120
+  - name: Referenced Performed Procedure Step Sequence
+    # X/Z/D
+    action: Z
+    tag:
+    - 0x8
+    - 0x1111
   - name: Referenced SOP Instance MAC Sequence
     # X
     action: X
     tag:
     - 0x400
     - 0x403
+  - name: Referenced SOP Instance UID
+    # U
+    action: U
+    tag:
+    - 0x8
+    - 0x1155
   - name: Referenced SOP Instance UID in File
     # U
     action: U
     tag:
     - 0x4
     - 0x1511
+  - name: Referenced Study Sequence
+    # X/Z
+    action: Z
+    tag:
+    - 0x8
+    - 0x1110
   - name: Referenced Treatment Position Group UID
     # U
     action: U
@@ -1892,7 +2434,6 @@ rules:
     - 0x92
   - name: Referring Physician's Name
     # Z
-    action: Z
     tag:
     - 0x8
     - 0x90
@@ -1920,9 +2461,31 @@ rules:
     tag:
     - 0x3006
     - 0xC2
+  - name: Request Attributes Sequence
+    # X
+    action: X
+    tag:
+    - 0x40
+    - 0x275
+  # - name: Requested Contrast Agent
+  #   # X
+  #   tag:
+  #   - 0x32
+  #   - 0x1070
+  - name: Requested Procedure Comments
+    # X
+    action: X
+    tag:
+    - 0x40
+    - 0x1400
+  # - name: Requested Procedure Description
+  #   # X/Z
+  #   tag:
+  #   - 0x40
+  #   - 0x1060
   - name: Requested Procedure ID
     # X
-    action: Z
+    action: X
     tag:
     - 0x40
     - 0x1001
@@ -1932,6 +2495,11 @@ rules:
     tag:
     - 0x40
     - 0x1005
+  # - name: Requested Series Description
+  #   # X
+  #   tag:
+  #   - 0x18
+  #   - 0x9937
   - name: Requested SOP Instance UID
     # U
     action: U
@@ -1962,6 +2530,11 @@ rules:
     tag:
     - 0x32
     - 0x1033
+  # - name: Respiratory Motion Compensation Technique Description
+  #   # X keep
+  #   tag:
+  #   - 0x18
+  #   - 0x9185
   - name: Responsible Organization
     # X
     action: X
@@ -2009,12 +2582,62 @@ rules:
     tag:
     - 0x300E
     - 0x8
+  # - name: Review Time
+  #   # Z
+  #   tag:
+  #   - 0x300E
+  #   - 0x5
+  - name: ROI Creator Sequence
+    # X
+    tag:
+    - 0x3006
+    - 0x4D
+  - name: ROI DateTime
+    # X
+    tag:
+    - 0x3006
+    - 0x2D
+  # - name: ROI Description
+  #   # X
+  #   tag:
+  #   - 0x3006
+  #   - 0x28
+  # - name: ROI Generation Description
+  #   # X
+  #   tag:
+  #   - 0x3006
+  #   - 0x38
   - name: ROI Interpreter
     # Z
     action: Z
     tag:
     - 0x3006
     - 0xA6
+  - name: ROI Interpreter Sequence
+    # X
+    tag:
+    - 0x3006
+    - 0x4E
+  # - name: ROI Name
+  #   # Z
+  #   tag:
+  #   - 0x3006
+  #   - 0x26
+  - name: ROI Observation DateTime
+    # X
+    tag:
+    - 0x3006
+    - 0x2E
+  # - name: ROI Observation Description
+  #   # X
+  #   tag:
+  #   - 0x3006
+  #   - 0x88
+  # - name: ROI Observation Label
+  #   # X
+  #   tag:
+  #   - 0x3006
+  #   - 0x85
   - name: RT Accessory Device Slot ID
     # Z
     action: Z
@@ -2027,12 +2650,52 @@ rules:
     tag:
     - 0x300A
     - 0x611
+  # - name: RT Physician Intent Narrative
+  #   # Z
+  #   tag:
+  #   - 0x3010
+  #   - 0x5A
   - name: RT Plan Date
     # X/D
     action: D
     tag:
     - 0x300A
     - 0x6
+  # - name: RT Plan Description
+  #   # X
+  #   tag:
+  #   - 0x300A
+  #   - 0x4
+  # - name: RT Plan Label
+  #   # D
+  #   tag:
+  #   - 0x300A
+  #   - 0x2
+  # - name: RT Plan Name
+  #   # X
+  #   tag:
+  #   - 0x300A
+  #   - 0x3
+  # - name: RT Plan Time
+  #   # X/D
+  #   tag:
+  #   - 0x300A
+  #   - 0x7
+  # - name: RT Prescription Label
+  #   # D
+  #   tag:
+  #   - 0x300A
+  #   - 0x54
+  # - name: RT Tolerance Set Label
+  #   # D
+  #   tag:
+  #   - 0x300A
+  #   - 0x62A
+  # - name: RT Treatment Approach Label
+  #   # X/D
+  #   tag:
+  #   - 0x300A
+  #   - 0x56
   - name: RT Treatment Phase UID
     # U
     action: U
@@ -2045,24 +2708,44 @@ rules:
     tag:
     - 0x3008
     - 0x162
+  # - name: Safe Position Exit Time
+  #   # D
+  #   tag:
+  #   - 0x3008
+  #   - 0x164
   - name: Safe Position Return Date
     # D
     action: D
     tag:
     - 0x3008
     - 0x166
+  # - name: Safe Position Return Time
+  #   # D
+  #   tag:
+  #   - 0x3008
+  #   - 0x168
   - name: Scheduled Admission Date
     # C
     action: D
     tag:
     - 0x38
     - 0x1A
+  # - name: Scheduled Admission Time
+  #   # X
+  #   tag:
+  #   - 0x38
+  #   - 0x1B
   - name: Scheduled Discharge Date
     # X
     action: D
     tag:
     - 0x38
     - 0x1C
+  # - name: Scheduled Discharge Time
+  #   # X
+  #   tag:
+  #   - 0x338
+  #   - 0x1D
   - name: Scheduled Human Performers Sequence
     # X
     action: X
@@ -2087,12 +2770,22 @@ rules:
     tag:
     - 0x40
     - 0xB
+  # - name: Scheduled Procedure Step Description
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0x7
   - name: Scheduled Procedure Step End Date
     # X
     action: D
     tag:
     - 0x40
     - 0x4
+  # - name: Scheduled Procedure Step End Time
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0x5
   - name: Scheduled Procedure Step Expiration DateTime
     # X
     action: D
@@ -2101,7 +2794,7 @@ rules:
     - 0x4008
   - name: Scheduled Procedure Step ID
     # X
-    action: Z
+    action: X
     tag:
     - 0x40
     - 0x9
@@ -2129,6 +2822,11 @@ rules:
     tag:
     - 0x40
     - 0x5
+  # - name: Scheduled Procedure Step Start Time
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0x3
   - name: Scheduled Station AE Title
     # X
     action: X
@@ -2171,12 +2869,22 @@ rules:
     tag:
     - 0x32
     - 0x1000
+  # - name: Scheduled Study Start Time
+  #   # X
+  #   tag:
+  #   - 0x32
+  #   - 0x1001
   - name: Scheduled Study Stop Date
     # X
     action: D
     tag:
     - 0x32
     - 0x1010
+  # - name: Scheduled Study Stop Time
+  #   # X
+  #   tag:
+  #   - 0x32
+  #   - 0x1011
   - name: Secondary Diagnoses Code Sequence
     # X
     tag:
@@ -2193,6 +2901,32 @@ rules:
     tag:
     - 0x72
     - 0x5E
+  # - name: Selector AS Value
+  #   # D
+  #   action: D
+  #   tag:
+  #   - 0x72
+  #   - 0x5F
+  # - name: Selector DA Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x61
+  # - name: Selector DT Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x63
+  # - name: Selector LO Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x66
+  # - name: Selector LT Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x68
   - name: Selector OB Value
     # D
     action: X
@@ -2205,6 +2939,21 @@ rules:
     tag:
     - 0x72
     - 0x6A
+  # - name: Selector SH Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x6C
+  # - name: Selector ST Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x6E
+  # - name: Selector TM Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x6B
   - name: Selector UN Value
     # D
     action: X
@@ -2217,30 +2966,65 @@ rules:
     tag:
     - 0x72
     - 0x71
+  # - name: Selector UT Value
+  #   # D
+  #   tag:
+  #   - 0x72
+  #   - 0x70
   - name: Series Date
     #X/D
     action: D
     tag:
     - 0x8
     - 0x21
+  # - name: Series Description
+  #   #X  keep
+  #   tag:
+  #   - 0x8
+  #   - 0x103E
   - name: Series Instance UID
     #U
     action: U
     tag:
     - 0x20
     - 0xE
+  # - name: Series Time
+  #   #X/D  keep
+  #   tag:
+  #   - 0x8
+  #   - 0x31
+  # - name: Service Episode Description
+  #   #X
+  #   tag:
+  #   - 0x38
+  #   - 0x62
   - name: Service Episode ID
     #X
     action: X
     tag:
     - 0x38
     - 0x60
+  # - name: Setup Technique Description
+  #   #X
+  #   tag:
+  #   - 0x300A
+  #   - 0x1B2
+  # - name: Shielding Device Description
+  #   #X
+  #   tag:
+  #   - 0x300A
+  #   - 0x1A6
   - name: Slide Identifier
     #X
     action: X
     tag:
     - 0x40
     - 0x6FA
+  # - name: Smoking Status
+  #   #X keep
+  #   tag:
+  #   - 0x10
+  #   - 0x21A0
   - name: SOP Authorization DateTime
     #X
     action: D
@@ -2277,6 +3061,12 @@ rules:
     tag:
     - 0x34
     - 0x5
+  - name: Source Image Sequence
+    #X/Z/U
+    action: Z
+    tag:
+    - 0x8
+    - 0x2112
   - name: Source Manufacturer
     #X
     action: X
@@ -2306,6 +3096,16 @@ rules:
     tag:
     - 0x300A
     - 0x22C
+  # - name: Source Strength Reference DateTime
+  #   #D
+  #   tag:
+  #   - 0x300A
+  #   - 0x22C
+  # - name: Source Strength Reference Time
+  #   #D
+  #   tag:
+  #   - 0x300A
+  #   - 0x22E
   - name: Special Needs
     #X
     action: X
@@ -2318,6 +3118,11 @@ rules:
     tag:
     - 0x40
     - 0x50A
+  # - name: Specimen Detailed Description
+  #   #X
+  #   tag:
+  #   - 0x40
+  #   - 0x610
   - name: Specimen Identifier
     #D
     action: D
@@ -2330,6 +3135,11 @@ rules:
     tag:
     - 0x40
     - 0x610
+  # - name: Specimen Short Description
+  #   #X
+  #   tag:
+  #   - 0x40
+  #   - 0x600
   - name: Specimen UID
     #U
     action: U
@@ -2350,7 +3160,7 @@ rules:
     - 0x55
   - name: Station Name
      #X/Z/D
-    action: Z
+    action: X
     tag:
     - 0x8
     - 0x1010
@@ -2366,24 +3176,65 @@ rules:
     tag:
     - 0x3006
     - 0x8
+  # - name: Structure Set Description
+  #   #X
+  #   tag:
+  #   - 0x3006
+  #   - 0x6
+  # - name: Structure Set Label
+  #   #D
+  #   tag:
+  #   - 0x3006
+  #   - 0x2
+  # - name: Structure Set Name
+  #   #X
+  #   tag:
+  #   - 0x3006
+  #   - 0x4
+  # - name: Structure Set Time
+  #   # Z
+  #   tag:
+  #   - 0x3006
+  #   - 0x4
   - name: Study Arrival Date
     #X
     action: D
     tag:
     - 0x32
     - 0x1040
+  # - name: Study Arrival Time
+  #   #X
+  #   tag:
+  #   - 0x32
+  #   - 0x1041
+  - name: Study Comments
+    #X
+    action: X
+    tag:
+    - 0x32
+    - 0x4000
   - name: Study Completion Date
     #X
     action: D
     tag:
     - 0x32
     - 0x1050
+  # - name: Study Completion Time
+  #   #X
+  #   tag:
+  #   - 0x32
+  #   - 0x1051
   - name: Study Date
     # D
     action: D
     tag:
     - 0x8
     - 0x20
+  # - name: Study Description
+  #   #X  keep
+  #   tag:
+  #   - 0x32
+  #   - 0x1030
   - name: Study ID
     # Z
     action: Z
@@ -2408,12 +3259,27 @@ rules:
     tag:
     - 0x32
     - 0x34
+  # - name: Study Read Time
+  #   #X
+  #   tag:
+  #   - 0x32
+  #   - 0x35
+  # - name: Study Time
+  #   # Z  keep
+  #   tag:
+  #   - 0x8
+  #   - 0x30
   - name: Study Verified Date
     # X
     action: D
     tag:
     - 0x32
     - 0x32
+  # - name: Study Verified Time
+  #   # X
+  #   tag:
+  #   - 0x32
+  #   - 0x33
   - name: Substance Administration DateTime
     # X
     action: D
@@ -2455,6 +3321,11 @@ rules:
     tag:
     - 0x40
     - 0xDB0C
+  # - name: Template Local Version
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0xDB07
   - name: Text Comments
     # X
     action: X
@@ -2467,12 +3338,32 @@ rules:
     tag:
     - 0x2030
     - 0x20
-  - name: Content Date
-    # D
-    action: D
+  # - name: Time
+  #   # D
+  #   tag:
+  #   - 0x40
+  #   - 0xA122
+  # - name: Time of Document Creation or Verbal Transaction (Trial)
+  #   # X
+  #   tag:
+  #   - 0x40
+  #   - 0xA112
+  - name: Time of Last Calibration
+    # X
+    action: X
     tag:
-    - 0x8
-    - 0x23
+    - 0x18
+    - 0x1201
+  # - name: Time of Last Detector Calibration
+  #   # X/D keep
+  #   tag:
+  #   - 0x18
+  #   - 0x700E
+  # - name: Time of Secondary Capture
+  #   # X keep
+  #   tag:
+  #   - 0x18
+  #   - 0x1014
   - name: Timezone Offset From UTC
     # X
     action: X
@@ -2532,6 +3423,11 @@ rules:
     tag:
     - 0x3008
     - 0x24
+  # - name: Treatment Control Point Time
+  #   # D
+  #   tag:
+  #   - 0x3008
+  #   - 0x25
   - name: Treatment Date
     # X/D
     action: D
@@ -2544,6 +3440,11 @@ rules:
     tag:
     - 0x300A
     - 0xB2
+  # - name: Treatment Position Group Label
+  #   # D
+  #   tag:
+  #   - 0x300A
+  #   - 0x608
   - name: Treatment Position Group UID
     # U
     action: U
@@ -2562,12 +3463,22 @@ rules:
     tag:
     - 0x3010
     - 0x77
+  # - name: Treatment Sites
+  #   # X
+  #   tag:
+  #   - 0x300A
+  #   - 0x000B
   - name: Treatment Technique Notes
     # Z
     action: X
     tag:
     - 0x3010
     - 0x7A
+  # - name: Treatment Time
+  #   # X/D
+  #   tag:
+  #   - 0x3008
+  #   - 0x251
   - name: Treatment Tolerance Violation DateTime
     # D
     tag:
@@ -2591,6 +3502,16 @@ rules:
     tag:
     - 0x18
     - 0x1009
+  # - name: User Content Label
+  #   # D
+  #   tag:
+  #   - 0x3010
+  #   - 0x33
+  # - name: User Content Long Label
+  #   # D
+  #   tag:
+  #   - 0x3010
+  #   - 0x34
   - name: Verbal Source (Trial)
     # X
     action: X
@@ -2611,13 +3532,13 @@ rules:
     - 0xA030
   - name: Verifying Observer Identification Code Sequence
     # Z
-    action: X
+    action: Z
     tag:
     - 0x40
     - 0xA088
   - name: Verifying Observer Name
     # D
-    action: Z
+    action: D
     tag:
     - 0x40
     - 0xA075
@@ -2629,7 +3550,7 @@ rules:
     - 0xA073
   - name: Verifying Organization
     # D
-    action: Z
+    action: D
     tag:
     - 0x40
     - 0xA027
@@ -2639,6 +3560,12 @@ rules:
     tag:
     - 0x38
     - 0x4000
+  # - name: Waveform Filter Description
+  #   # X
+  #   action: X
+  #   tag:
+  #   - 0x3A
+  #   - 0x0329
   - name: X-Ray Detector ID
     # D
     action: D
@@ -2657,128 +3584,141 @@ rules:
     tag:
     - 0x18
     - 0x9367
+  
+  
+
+  
   - name: Reference SOP Instance UID
-    action: U
     tag:
     - 0x8
     - 0x1155
-  - name: Institutional Department Name
-    # Z
-    action: Z
+  
+  - name: '[The Acquisition Date of NRA]'
     tag:
-    - 0x8
-    - 0x1040
-  - name: Medical Alerts
-    action: Z
+    - 0x7005
+    - 0x1024
+  - name: '[PET patient_datetime]'
     tag:
-    - 0x10
-    - 0x2000
-  - name: Imaging Service Request Comments
-    action: Z
+    - 0x9
+    - 0x1005
+  - name: '[PET scan_datetime]'
     tag:
-    - 0x40
-    - 0x2400
-  - name: [Actual series data time stamp]
-    action: D
+    - 0x9
+    - 0x100D
+  - name: '[PET scan_ready]'
     tag:
-    - 0x0009
-    - 0x10E9
+    - 0x9
+    - 0x100E
+  - name: '[PET meas_datetime]'
+    tag:
+    - 0x9
+    - 0x1039
+  - name: '[PET admin_datetime]'
+    tag:
+    - 0x9
+    - 0x103B
+  - name: '[PET post_inj_datetime]'
+    tag:
+    - 0x9
+    - 0x103D
+  - name: '[PET landmark_datetime]'
+    tag:
+    - 0x9
+    - 0x1068
+  - name: '[PET acq_start]'
+    tag:
+    - 0x9
+    - 0x106C
+  - name: '[PET is_datetime]'
+    tag:
+    - 0x9
+    - 0x107B  
+  - name: '[PET exam_id]'
+    tag:
+    - 0x9
+    - 0x1007
+  - name: '[PET for_identifier]'
+    tag:
+    - 0x9
+    - 0x1013
+  - name: '[PET normal_cal_id]'
+    tag:
+    - 0x9
+    - 0x1056
+  - name: '[PET normal_2d_cal_id]'
+    tag:
+    - 0x9
+    - 0x1057
+  - name: '[PET frame_id]'
+    tag:
+    - 0x9
+    - 0x105C
+  - name: '[PET exam_id]'
+    tag:
+    - 0x9
+    - 0x105E
+  - name: '[PET norm_cal_id]'
+    tag:
+    - 0x9
+    - 0x1098
+  - name: '[PET scan_id]'
+    tag:
+    - 0x9
+    - 0x100A
+  - name: '[PET wc_cal_id]'
+    tag:
+    - 0x9
+    - 0x1059
+  - name: '[PET scan_id]'
+    tag:
+    - 0x9
+    - 0x105D
+  - name: '[PET trans_scan_id]'
+    tag:
+    - 0x9
+    - 0x1097
+  - name: '[PET trans_frame_id]'
+    tag:
+    - 0x9
+    - 0x10AD
 
   keywords:
-  - Address
-  - Telephone Numbers
-  - Fax Numbers
-  - Suite id
-  - Series from which Prescribed
-  - Slop_int_10
-  - Clinical Trial Site Name
-  - Clinical Trial Protocol ID
-  - Clinical Trial Site ID
-  - Clinical Trial Time Point ID
-  - Clinical Trial Time Point Description
-  - Verifying Observer Name
-  - Verifying Organization
-  - Person Name
-  - Content Creator's Name
-  - PET batch_description
-  - Service id
-  - Physician(s) of Record
-  - Img is original or unoriginal
-  - Clinical Trial Subject Reading ID
-  - PMTF Information
-  - Histogram tables
-  - Study ID
-  - Institution Name
-  - Performed Station AE Title
-  - Clinical Trial Subject ID
-  - Retrieve AE Title
-  - Timezone Offset From UTC
   - Curve Data
-  - Curve Description
-  - Number of Points
-  - Type of Data
-  - Curve Description
-  - Axis Units
-  - Axis Labels
-  - Data Value Representation
   - Overlay Comments
   - Overlay Data
   - Private Attributes
-  - Institutional Department Name
-  - Clinical Trial Subject Reading ID
-  - 3D Filter flag
-  - 3D Filter order
-  - 3D Filter cutoff
-  - Coil ID Data
-  - Exam Record checksum
-  - Image archive flag
-  - Mobile location number
-  - PET file_exists
-  - PET where_is_frame
-  - PMTF Information
-  - Recon Protocol
-  - PET total_delays
-  - PET frame_size
-  - PET type
-  - PET total_prompts
-  - Scheduled Procedure Step ID
-  - Device Serial Number
-  - Slop_int_10...slop_int_17
-  - Start time(secs) in first axial
-  - Image actual date
-  - Institution Address
- 
-  condition_remove:
-  - Requested Procedure Description
-  - Series Description
-  - Study Comments
-  - Text Value
-  - Study Description
-  - Private tag data
-  - Series Number
-  - Image Comments
-  - Protocol Name
-  - Additional Patient History
-  - Comments on Radiation Dose
-  - Requested Procedure Comments
-  - Scheduled Procedure Step Description
-  - Patient Comments
-
-  skip_uid:
-  - Referenced SOP Class UID 
-  - SOP Class UID
-
   regex:
-  - \d{2}.\d{2}.\d{4}
-  - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}
-  - \d{2}/\d{2}/\d{4}
+  - \d\/\d{2}
   - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}'
   - \d{5}(?:[-\s]\d{4})?
-  - \d{2}-\d{2}-\d{4}
+  - \d{2}/\d{2}/\d{4}
+  - \d{3}[-.\s]?d{7}
+  - \d{2}.\d{2}.\d{4}
   - \d{3}-\d{2}-\d{4}
-  - \b(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\b  #date in format of yyyymmdd
-  - \b(19\d{2}|20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])([01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]\b  #datetime in the format of yyyymmddhhMMss
-  - \d{10} #tel
-  - '\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b' #two words starting with capital letter as name
-  - \b\d+\s+[A-Za-z]+\s+[A-Za-z]+\s+(?:St|Ave|Blvd|Rd|Dr|Ln|Ct|Way|Pl)\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b #address
-  
+  - \d{3}[-.\s]?\d{3}[-.\s]?\d{4}
+  - \(\d{3}\)[\s]?\d{3}-\d{4}
+  - '[a-zA-Z]{3}'
+  - \d{2}-\d{2}-\d{4}
+
+# DE-ID actions:
+# D: replace with a non-zero length value that may be a dummy value and consistent with the VR
+
+# Z: replace with a zero length value, or a non-zero length value that may be a dummy value and consistent with the VR
+
+# X:remove
+
+# K: keep (unchanged for non-Sequence Attributes, cleaned for Sequences)
+
+# C: clean, that is replace with values of similar meaning known not to contain identifying information and consistent with the VR
+
+# U: replace with a non-zero length UID that is internally consistent within a set of Instances
+
+# Z/D: Z unless D is required to maintain IOD conformance (Type 2 versus Type 1)
+
+# X/Z: X unless Z is required to maintain IOD conformance (Type 3 versus Type 2)
+
+# X/D: X unless D is required to maintain IOD conformance (Type 3 versus Type 1)
+
+# X/Z/D: X unless Z or D is required to maintain IOD conformance (Type 3 versus Type 2 versus Type 1)
+
+# X/Z/U*: X unless Z or replacement of contained instance UIDs (U) is required to maintain IOD conformance (Type 3 versus Type 2 versus Type 1 sequences containing UID references)

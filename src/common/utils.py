@@ -1,6 +1,7 @@
 import tarfile, json, re, requests, yaml, boto3, sys, csv
 from datetime import datetime 
 import os
+import struct
 import shutil
 import matplotlib.pyplot as plt
 import os
@@ -158,37 +159,48 @@ def generate_regex(data):
     """
     Generate a regular expression pattern from the given data.
     """
-    pattern = ''
-    dataLength = len(data)
-    i = 0
-    
-    while i < dataLength:
-        char = data[i]
-        if isinstance(data, str) and char.isalpha():
-            start = i
-            while i < dataLength and data[i].isalpha():
-                i += 1
-            if i - start > 1:
-                pattern += '[a-zA-Z]{' + str(i - start) + '}'
+    if isinstance(data, str):
+        pattern = ''
+        dataLength = len(data)
+        i = 0
+
+        while i < dataLength:
+            char = data[i]
+            if char.isalpha():
+                start = i
+                while i < dataLength and data[i].isalpha():
+                    i += 1
+                if i - start < 1:
+                    pattern += '[a-zA-Z]{' + str(i - start) + '}'
+                else:
+                    pattern += '[a-zA-Z]'
+            elif char.isdigit():
+                start = i
+                while i < dataLength and data[i].isdigit():
+                    i += 1
+                if i - start < 1:
+                    pattern += r'\d{' + str(i - start) + '}'
+                else:
+                    pattern += r'\d'
+            elif char.isspace():
+                start = i
+                while i < dataLength and data[i].isspace():
+                    i += 1
+                if i - start < 1:
+                    pattern += r'\s{' + str(i - start) + '}'
+                else:
+                    pattern += r'\s'
             else:
-                pattern += '[a-zA-Z]'
-        elif isinstance(data, str) and char.isdigit():
-            start = i
-            while i < dataLength and data[i].isdigit():
+                pattern += escapeSpecialChar(char)
                 i += 1
-            if i - start > 1:
-                pattern += r'\d{' + str(i - start) + '}'
-            else:
-                pattern += r'\d'
-        elif isinstance(data, str) and char.isspace():
-            start = i
-            while i < dataLength and data[i].isspace():
-                i += 1
-            if i - start > 1:
-                pattern += r'\s{' + str(i - start) + '}'
-            else:
-                pattern += r'\s'
-        elif isinstance(data, bytes):
+        return pattern
+
+    elif isinstance(data, bytes):
+        pattern = b''
+        dataLength = len(data)
+        i = 0
+
+        while i < dataLength:
             count = 1
             while i + count < dataLength and data[i] == data[i + count]:
                 count += 1
@@ -197,10 +209,10 @@ def generate_regex(data):
             else:
                 pattern += b'\\x' + format(data[i], '02x').encode('utf-8') + b'{' + str(count).encode('utf-8') + b'}'
             i += count
-        else:
-            pattern += escapeSpecialChar(char)
-            i += 1
-    return pattern
+        return pattern
+
+    else:
+        raise TypeError("Unsupported data type. Only str and bytes are supported.")
 
 def escapeSpecialChar(char):
     """
@@ -219,7 +231,7 @@ def cleanup_dir(dirs):
                 shutil.rmtree(dir)
         os.makedirs(dir)
 
-def convert_basetag(base_tag):
+def convert_base_tag(base_tag):
     if base_tag and base_tag > 0:
         return ((base_tag >> 16) & 0xFFFF, base_tag & 0xFFFF)
     
@@ -268,4 +280,65 @@ def convert_json_to_csv(json_file, csv_file, cols = ["id_old", "id_new"]):
         for key, value in data.items():
             writer.writerow([key, value])
 
+def match_date(date_str):
+    """
+    match date string with regex
+    """
+    if len(date_str.strip().split(" ")[-1]) not in [8, 14]:
+        return False, date_str
+    pattern_8 = r"\b(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])\b"  #date in format of yyyymmdd
+    pattern_14 = r"\b(19\d{2}|20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])([01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]\b"  #datetime in the format of yyyymmddhhMMss
+    combined_pattern = f"{pattern_14}|{pattern_8}"
+    pattern = re.compile(combined_pattern)
+    matches = pattern.findall(date_str.strip())
+    if len(matches) > 0:
+        val = re.sub(pattern, "", date_str)
+        return True, val.strip()
+    else:
+        return False, date_str
 
+def match_name(name):
+    """
+    match name string with regex
+    """
+    if name.strip() in ["Tx Plan"]:
+        return None 
+    pattern = r'\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b'
+    if " " in name.strip() and len(name.strip().split(" ")) == 2:
+        return re.match(pattern, name.strip())
+    else:
+        return None
+    
+def match_phone(phone):
+    """
+    match phone string with regex
+    """
+    if len(phone.strip()) < 10 or len(phone.strip().split(" ")[-1]) < 10 :
+        return False, phone
+    pattern = r'\b1-\d{3}-\d{3}-\d{4}\b'
+    pattern1 = r'(?:\+1[-\s]?)?(?:\(?\d{3}\)?[-\s]?)?\d{3}[-\s]?\d{4}'
+    pattern2 = r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}(?:\s*(?:[xX]|ext)\s*\d+)?\b'
+    combined_pattern = f"{pattern2}|{pattern1}|{pattern}"
+    pattern = re.compile(combined_pattern)
+    matches = pattern.findall(phone.strip())
+    if len(matches) > 0:
+        val = re.sub(pattern, "", phone)
+        return True, val.strip()
+    else:
+        return False, phone
+
+def match_address(address):
+    """
+    match address string with regex
+    """
+    pattern = r'\b\d+\s+[A-Za-z]+\s+[A-Za-z]+\s+(?:St|Ave|Blvd|Rd|Dr|Ln|Ct|Way|Pl)\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
+    pattern2 = r'\b\d+\s+[A-Za-z0-9\s]+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Lane|Ln|Dr|Drive)?\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}\b'
+    combined_pattern = f"{pattern2}|{pattern}"
+    pattern = re.compile(combined_pattern)
+    matches = pattern.findall(address.strip())
+    if len(matches) > 0:
+        val = re.sub(pattern, "", address)
+        if val.strip().upper() in ["E", "W", "N", "S"]:
+            val = ""
+        return True, val.strip()
+    return False, address
