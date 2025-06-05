@@ -586,7 +586,7 @@ class ProcessMedImage:
         """
         Function to replace sensitive data with placeholders or anonymous values.
         """
-        action = self.phi_tags[tag]
+        action = self.phi_tags.get(tag, "")
         if action.upper() in ["X", "Z"]:
             if isinstance(value, str):
                 return EMPTY_STRING
